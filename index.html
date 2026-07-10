@@ -51,6 +51,7 @@
   .zx-datenav button{background:none;border:1px solid var(--line);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px}
   .zx-datenav button:hover{color:var(--jade)}
   .zx-datenav .d{min-width:150px;text-align:center;color:var(--text)}
+  .zx-datenav .d small{display:block;color:var(--muted);font-size:11px;margin-top:3px;letter-spacing:.5px}
   .zx-datenav .today-btn{width:auto;padding:0 10px;font-size:12px;color:var(--gold);border-color:#4a4030}
 
   /* ---------- grid ---------- */
@@ -178,33 +179,44 @@
   let viewDate = todayStr();          // 日常查看的日期
   let cache = {};                     // storage 缓存 {key: dataObj}
 
-  /* ================= 工具 ================= */
-  function todayStr(offsetDays){
-    const d = new Date();
-    if(offsetDays) d.setDate(d.getDate()+offsetDays);
-    return fmt(d);
+  /* ================= 工具 =================
+     游戏日：国服每日北京时间 8:00 刷新，恰好等于 UTC 0:00。
+     因此直接用 UTC 日期作为“游戏日”，自动适配本地时区和夏令时。 */
+  function fmtUTC(d){
+    return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
   }
-  function fmt(d){
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  function todayStr(offsetDays){
+    return fmtUTC(new Date(Date.now() + (offsetDays||0)*86400000));
   }
   function shiftDate(str, n){
     const [y,m,dd] = str.split('-').map(Number);
-    const d = new Date(y, m-1, dd);
-    d.setDate(d.getDate()+n);
-    return fmt(d);
+    return fmtUTC(new Date(Date.UTC(y, m-1, dd) + n*86400000));
   }
-  // 周常：以周三为一周起点（游戏周三早8点刷新）
+  // 周常：以周三为一周起点（游戏北京时间周三早8点刷新）
   function weekKeyOf(dateStr){
     const [y,m,dd] = dateStr.split('-').map(Number);
-    const d = new Date(y, m-1, dd);
-    const day = d.getDay();               // 0=日 … 3=三
-    const back = (day - 3 + 7) % 7;       // 回退到最近的周三
-    d.setDate(d.getDate() - back);
-    return fmt(d);
+    const d = new Date(Date.UTC(y, m-1, dd));
+    const back = (d.getUTCDay() - 3 + 7) % 7;   // 回退到最近的周三
+    return fmtUTC(new Date(d.getTime() - back*86400000));
   }
   function weekday(dateStr){
     const [y,m,dd] = dateStr.split('-').map(Number);
-    return '日一二三四五六'[new Date(y,m-1,dd).getDay()];
+    return '日一二三四五六'[new Date(Date.UTC(y,m-1,dd)).getUTCDay()];
+  }
+  // 本地几点切换新的游戏日（= 下一个UTC 0点对应的本地时间）
+  function localResetTime(){
+    const d = new Date();
+    d.setUTCHours(24,0,0,0);
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  // 一个游戏日/游戏周对应的本地时间段，如 "7/9 周四 20:00 → 7/10 周五 20:00"
+  function localRange(dateStr, days){
+    const [y,m,dd] = dateStr.split('-').map(Number);
+    const s = new Date(Date.UTC(y, m-1, dd));
+    const e = new Date(s.getTime() + (days||1)*86400000);
+    const f = d => (d.getMonth()+1)+'/'+d.getDate()+' 周'+'日一二三四五六'[d.getDay()]+' '
+      + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    return f(s)+' → '+f(e);
   }
   function uid(p){ return p + Math.random().toString(36).slice(2,8); }
   function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -425,13 +437,13 @@
       const isToday = viewDate === todayStr();
       html += `<div class="zx-datenav">
         <button data-act="prev">‹</button>
-        <span class="d">${viewDate}（周${weekday(viewDate)}）${isToday?'· 今天':''}</span>
+        <span class="d">游戏日 ${viewDate} 周${weekday(viewDate)}${isToday?' · 今天':''}<small>本地 ${localRange(viewDate)}</small></span>
         <button data-act="next" ${viewDate>=todayStr()?'disabled style="opacity:.3"':''}>›</button>
         ${isToday?'':'<button class="today-btn" data-act="today">回今天</button>'}
       </div>`;
     }else{
       const wk = weekKeyOf(todayStr());
-      html += `<div class="zx-datenav"><span class="d">本周（${wk} 起 · 周三8点刷新）</span></div>`;
+      html += `<div class="zx-datenav"><span class="d">本周 · ${wk} 起<small>本地 ${localRange(wk, 7)}</small></span></div>`;
     }
 
     html += '<div class="zx-card"><table class="zx-grid"><thead><tr><th class="taskcol zx-serif">事项</th>';
@@ -468,9 +480,9 @@
     html += '</tr></tbody></table></div>';
 
     if(tab==='weekly'){
-      html += `<div class="zx-note">周常次数于每周三早上8点（服务器时间）刷新。次数类事项点 <b>＋/−</b> 记录，单次事项点圈打卡。</div>`;
+      html += `<div class="zx-note">周常次数于每周三早8点（北京时间，即你本地周二 <b>${localResetTime()}</b>）刷新。次数类事项点 <b>＋/−</b> 记录，单次事项点圈打卡。</div>`;
     }else{
-      html += `<div class="zx-note">点圈即打卡；可用 ‹ › 回看/补记之前的日期。事项和角色可在右上角 <b>设置</b> 中增删改。</div>`;
+      html += `<div class="zx-note">按<b>游戏日</b>记录（国服每日北京时间8点刷新）：你本地每天 <b>${localResetTime()}</b> 切换到新的一天，和游戏内完全同步。点圈即打卡；可用 ‹ › 回看/补记。事项和角色可在 <b>⚙ 编辑</b> 中增删改。</div>`;
     }
     body.innerHTML = html;
   }
