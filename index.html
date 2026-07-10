@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d141d">
+<title>诛仙世界 · 修行录</title>
+</head>
+<body>
+<!-- 诛仙世界 S4 日常/周常 打卡 -->
+<style>
+  :root{
+    --ink:#0d141d;          /* 墨夜 */
+    --panel:#151f2b;        /* 青黛 */
+    --panel2:#1b2735;
+    --line:#26374a;
+    --jade:#5fc9a6;         /* 玉青 */
+    --jade-dim:#2c5b4d;
+    --gold:#d9b36c;         /* 鎏金 */
+    --text:#e9eee9;
+    --muted:#8595a3;
+    --danger:#d97b6c;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body,#zx-root{background:var(--ink);}
+  #zx-root{
+    color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    min-height:100vh;padding:16px 14px 48px;max-width:760px;margin:0 auto;
+  }
+  .zx-serif{font-family:"Kaiti SC","KaiTi","STKaiti","Noto Serif SC",serif;}
+
+  /* ---------- header ---------- */
+  .zx-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+    padding:6px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:14px;}
+  .zx-title{font-size:26px;letter-spacing:4px;line-height:1.2}
+  .zx-title small{display:block;font-size:12px;letter-spacing:6px;color:var(--gold);margin-top:4px;font-family:inherit}
+  .zx-gear{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
+    padding:6px 12px;font-size:13px;cursor:pointer}
+  .zx-gear:hover{color:var(--jade);border-color:var(--jade-dim)}
+
+  /* ---------- tabs ---------- */
+  .zx-tabs{display:flex;gap:8px;margin-bottom:14px}
+  .zx-tab{flex:1;padding:10px 0;text-align:center;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--panel);color:var(--muted);cursor:pointer;font-size:15px;letter-spacing:3px;}
+  .zx-tab.on{color:var(--ink);background:linear-gradient(135deg,var(--jade),#8fd9be);border-color:var(--jade);font-weight:600}
+
+  /* ---------- date nav ---------- */
+  .zx-datenav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px;color:var(--muted);font-size:14px}
+  .zx-datenav button{background:none;border:1px solid var(--line);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px}
+  .zx-datenav button:hover{color:var(--jade)}
+  .zx-datenav .d{min-width:150px;text-align:center;color:var(--text)}
+  .zx-datenav .today-btn{width:auto;padding:0 10px;font-size:12px;color:var(--gold);border-color:#4a4030}
+
+  /* ---------- grid ---------- */
+  .zx-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  table.zx-grid{width:100%;border-collapse:collapse;table-layout:fixed}
+  .zx-grid th,.zx-grid td{border-bottom:1px solid var(--line);padding:0;text-align:center}
+  .zx-grid th{padding:10px 6px;font-size:14px;font-weight:600;background:var(--panel2)}
+  .zx-grid th.taskcol{width:38%}
+  .zx-grid th .zx-char{color:var(--jade);letter-spacing:1px}
+  .zx-grid td.taskname{text-align:left;padding:11px 12px;font-size:14px;line-height:1.35}
+  .zx-grid td.taskname .cnt{color:var(--muted);font-size:12px;margin-left:4px}
+  .zx-grid tr:last-child td{border-bottom:none}
+
+  .zx-cell{width:100%;height:100%;min-height:46px;border:none;background:none;cursor:pointer;
+    color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px}
+  .zx-cell:hover{background:rgba(95,201,166,.06)}
+  .zx-cell.done{color:var(--jade);font-weight:600}
+  .zx-cell .ring{font-size:18px;line-height:1}
+  .zx-cell.done .ring{text-shadow:0 0 10px rgba(95,201,166,.5)}
+
+  .zx-counter{display:flex;align-items:center;justify-content:center;gap:2px;min-height:46px;padding:4px 2px}
+  .zx-counter .num{font-size:14px;min-width:44px;color:var(--muted)}
+  .zx-counter .num.full{color:var(--jade);font-weight:700}
+  .zx-counter .num.part{color:var(--gold)}
+  .zx-counter button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
+  .zx-counter button:hover{color:var(--jade);border-color:var(--jade-dim)}
+
+  .zx-foot td{padding:9px 6px;font-size:12px;color:var(--muted);background:var(--panel2)}
+  .zx-foot .ok{color:var(--jade)}
+
+  .zx-note{color:var(--muted);font-size:12px;margin:10px 4px 0;line-height:1.6}
+  .zx-note b{color:var(--gold);font-weight:600}
+
+  /* ---------- settings ---------- */
+  .zx-sec{margin-bottom:22px}
+  .zx-sec h3{font-size:15px;letter-spacing:2px;color:var(--gold);margin:0 2px 10px;font-weight:600}
+  .zx-item{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px;margin-bottom:8px}
+  .zx-item input[type=text]{flex:1;background:none;border:none;color:var(--text);font-size:14px;outline:none;min-width:0}
+  .zx-item input.times{flex:0 0 52px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:4px 2px;color:var(--gold)}
+  .zx-item .lbl{font-size:11px;color:var(--muted);flex:none}
+  .zx-del{flex:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px}
+  .zx-del:hover{color:var(--danger)}
+  .zx-mv{flex:none;display:flex;flex-direction:column;gap:1px}
+  .zx-mv button{background:none;border:none;color:var(--line);cursor:pointer;font-size:9px;line-height:1.1;padding:1px 4px}
+  .zx-mv button:hover{color:var(--jade)}
+  .zx-backup{display:flex;gap:8px}
+  .zx-bk{flex:1;padding:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+    color:var(--text);cursor:pointer;font-size:13px}
+  .zx-bk:hover{color:var(--jade);border-color:var(--jade-dim)}
+  .zx-add{width:100%;padding:9px 0;border:1px dashed var(--line);border-radius:10px;background:none;
+    color:var(--muted);cursor:pointer;font-size:13px}
+  .zx-add:hover{color:var(--jade);border-color:var(--jade-dim)}
+  .zx-savebar{position:sticky;bottom:0;padding:12px 0 4px;background:linear-gradient(transparent,var(--ink) 30%)}
+  .zx-save{width:100%;padding:12px 0;border:none;border-radius:var(--radius);cursor:pointer;
+    background:linear-gradient(135deg,var(--jade),#8fd9be);color:var(--ink);font-size:15px;font-weight:700;letter-spacing:4px}
+  .zx-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--panel2);
+    border:1px solid var(--jade-dim);color:var(--jade);padding:8px 18px;border-radius:20px;font-size:13px;
+    opacity:0;transition:opacity .25s;pointer-events:none;z-index:9}
+  .zx-toast.show{opacity:1}
+  .zx-loading{text-align:center;color:var(--muted);padding:60px 0;font-size:14px;letter-spacing:2px}
+
+  @media (max-width:480px){
+    .zx-title{font-size:21px;letter-spacing:2px}
+    .zx-grid td.taskname{font-size:13px;padding:9px 8px}
+    .zx-grid th{font-size:12.5px;padding:9px 3px}
+    .zx-counter button{width:24px;height:24px}
+    .zx-counter .num{min-width:38px;font-size:13px}
+  }
+</style>
+
+<div id="zx-root">
+  <div class="zx-head">
+    <div class="zx-title zx-serif">诛仙世界 · 修行录
+      <small>S4 碧落凡心 · 日常周常打卡</small>
+    </div>
+  </div>
+
+  <div class="zx-tabs">
+    <button class="zx-tab on" data-tab="daily">日 常</button>
+    <button class="zx-tab" data-tab="weekly">周 常</button>
+    <button class="zx-tab" data-tab="settings">⚙ 编 辑</button>
+  </div>
+
+  <div id="viewBody"><div class="zx-loading">灵气汇聚中…</div></div>
+</div>
+<div class="zx-toast" id="toast"></div>
+
+<script>
+(function(){
+  /* ================= 默认配置 ================= */
+  const DEFAULT_CONFIG = {
+    chars: [
+      {id:'c1', name:'猪猪萌萌哒'},
+      {id:'c3', name:'嘉嘉美美哒'},
+      {id:'c2', name:'小奶妈'}
+    ],
+    daily: [
+      {id:'d1', name:'活动（星历日常）', max:1},
+      {id:'d2', name:'仙符', max:1},
+      {id:'d3', name:'帮派 · 阵法补灵', max:1},
+      {id:'d4', name:'帮派 · 沐灵', max:1},
+      {id:'d5', name:'帮派 · 云间参悟', max:1},
+      {id:'d6', name:'仙府演武（挂机收菜）', max:1},
+      {id:'d7', name:'宠物远游 / 炼丹', max:1}
+    ],
+    weekly: [
+      {id:'w1', name:'邪枭事件', max:3},
+      {id:'w2', name:'风云事件', max:10},
+      {id:'w3', name:'爬塔 · 单人', max:1},
+      {id:'w4', name:'爬塔 · 双人', max:1},
+      {id:'w5', name:'世界BOSS', max:1},
+      {id:'w6', name:'天玺', max:1},
+      {id:'w7', name:'小队副本（5人）', max:1},
+      {id:'w8', name:'团队副本（10人）', max:1},
+      {id:'w9', name:'镜妖周礼', max:1},
+      {id:'w10', name:'帮派活跃度奖励领取', max:1}
+    ]
+  };
+
+  const CONFIG_KEY = 'zxsj-config-v1';
+  let config = null;
+  let tab = 'daily';
+  let viewDate = todayStr();          // 日常查看的日期
+  let cache = {};                     // storage 缓存 {key: dataObj}
+
+  /* ================= 工具 ================= */
+  function todayStr(offsetDays){
+    const d = new Date();
+    if(offsetDays) d.setDate(d.getDate()+offsetDays);
+    return fmt(d);
+  }
+  function fmt(d){
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function shiftDate(str, n){
+    const [y,m,dd] = str.split('-').map(Number);
+    const d = new Date(y, m-1, dd);
+    d.setDate(d.getDate()+n);
+    return fmt(d);
+  }
+  // 周常：以周三为一周起点（游戏周三早8点刷新）
+  function weekKeyOf(dateStr){
+    const [y,m,dd] = dateStr.split('-').map(Number);
+    const d = new Date(y, m-1, dd);
+    const day = d.getDay();               // 0=日 … 3=三
+    const back = (day - 3 + 7) % 7;       // 回退到最近的周三
+    d.setDate(d.getDate() - back);
+    return fmt(d);
+  }
+  function weekday(dateStr){
+    const [y,m,dd] = dateStr.split('-').map(Number);
+    return '日一二三四五六'[new Date(y,m-1,dd).getDay()];
+  }
+  function uid(p){ return p + Math.random().toString(36).slice(2,8); }
+  function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 1600);
+  }
+
+  /* ================= 存储（自动适配）=================
+     在 Claude 里运行时用 window.storage；
+     部署到网上后自动切换为浏览器 localStorage。 */
+  const hasCS = typeof window.storage === 'object' && window.storage && typeof window.storage.get === 'function';
+
+  async function loadKey(key){
+    if(cache[key] !== undefined) return cache[key];
+    let raw = null;
+    try{
+      if(hasCS){
+        const r = await window.storage.get(key);
+        raw = r ? r.value : null;
+      }else{
+        raw = localStorage.getItem(key);
+      }
+    }catch(e){ raw = null; }
+    try{ cache[key] = raw ? JSON.parse(raw) : null; }
+    catch(e){ cache[key] = null; }
+    return cache[key];
+  }
+  async function saveKey(key, obj){
+    cache[key] = obj;
+    const raw = JSON.stringify(obj);
+    try{
+      if(hasCS) await window.storage.set(key, raw);
+      else localStorage.setItem(key, raw);
+    }catch(e){ toast('保存失败，请重试'); }
+  }
+  async function listKeys(){
+    try{
+      if(hasCS){
+        const r = await window.storage.list('zxsj-');
+        return (r && r.keys) ? r.keys : [];
+      }
+      const out = [];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k && k.indexOf('zxsj-')===0) out.push(k);
+      }
+      return out;
+    }catch(e){ return []; }
+  }
+
+  async function loadConfig(){
+    const c = await loadKey(CONFIG_KEY);
+    config = c || JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    let dirty = !c;
+    // 迁移：老配置补入新角色「嘉嘉美美哒」
+    if(!config.mig1){
+      config.mig1 = true;
+      if(!config.chars.some(x=>x.id==='c3' || x.name==='嘉嘉美美哒')){
+        const i = config.chars.findIndex(x=>x.id==='c1');
+        config.chars.splice(i+1, 0, {id:'c3', name:'嘉嘉美美哒'});
+      }
+      dirty = true;
+    }
+    if(dirty) await saveKey(CONFIG_KEY, config);
+  }
+
+  /* ================= 备份 / 恢复 ================= */
+  const SYNC_KEY = 'zxsj-sync-v1';
+  let syncCfg = {token:'', gist:'', auto:false};
+  let pushTimer = null;
+
+  async function loadSync(){
+    const s = await loadKey(SYNC_KEY);
+    if(s) syncCfg = s;
+  }
+  async function buildDump(){
+    const keys = await listKeys();
+    const dump = {app:'zxsj-tracker', exportedAt:new Date().toISOString(), data:{}};
+    for(const k of keys){
+      if(k === SYNC_KEY) continue;           // 不备份 token
+      const v = await loadKey(k);
+      if(v !== null) dump.data[k] = v;
+    }
+    return dump;
+  }
+  async function applyDump(data){
+    let n = 0;
+    for(const k in data){
+      if(k.indexOf('zxsj-')!==0 || k===SYNC_KEY) continue;
+      await saveKey(k, data[k]);
+      n++;
+    }
+    cache = {}; config = null;
+    await loadConfig();
+    return n;
+  }
+  async function exportJSON(){
+    const dump = await buildDump();
+    const blob = new Blob([JSON.stringify(dump, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '诛仙打卡备份-' + todayStr() + '.json';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    toast('已导出备份');
+  }
+  async function importJSON(file){
+    try{
+      const text = await file.text();
+      const dump = JSON.parse(text);
+      const n = await applyDump(dump.data || dump);
+      toast('已恢复 ' + n + ' 条记录');
+      render();
+    }catch(e){ toast('文件格式不对，恢复失败'); }
+  }
+
+  /* ================= GitHub Gist 云同步 ================= */
+  function ghHeaders(){
+    return {'Authorization':'Bearer '+syncCfg.token, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json'};
+  }
+  async function pushCloud(silent){
+    if(!syncCfg.token){ if(!silent) toast('请先填写 GitHub Token'); return; }
+    try{
+      const dump = await buildDump();
+      const files = {'zxsj-backup.json': {content: JSON.stringify(dump, null, 2)}};
+      let res;
+      if(syncCfg.gist){
+        res = await fetch('https://api.github.com/gists/'+syncCfg.gist,
+          {method:'PATCH', headers:ghHeaders(), body:JSON.stringify({files})});
+      }else{
+        res = await fetch('https://api.github.com/gists',
+          {method:'POST', headers:ghHeaders(),
+           body:JSON.stringify({description:'诛仙世界打卡数据（自动同步）', public:false, files})});
+      }
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const j = await res.json();
+      if(!syncCfg.gist && j.id){
+        syncCfg.gist = j.id;
+        await saveKey(SYNC_KEY, syncCfg);
+        const el = document.getElementById('syncGist');
+        if(el) el.value = j.id;
+      }
+      if(!silent) toast('☁ 已上传到云端');
+    }catch(e){ if(!silent) toast('上传失败：'+e.message); }
+  }
+  async function pullCloud(){
+    if(!syncCfg.token || !syncCfg.gist){ toast('请先填写 Token 和 Gist ID'); return; }
+    try{
+      const res = await fetch('https://api.github.com/gists/'+syncCfg.gist, {headers:ghHeaders()});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const j = await res.json();
+      const f = j.files && j.files['zxsj-backup.json'];
+      if(!f) throw new Error('云端没有备份文件');
+      let content = f.content;
+      if(f.truncated){
+        const r2 = await fetch(f.raw_url);
+        content = await r2.text();
+      }
+      const dump = JSON.parse(content);
+      const n = await applyDump(dump.data || dump);
+      toast('☁ 已从云端恢复 ' + n + ' 条记录');
+      render();
+    }catch(e){ toast('拉取失败：'+e.message); }
+  }
+  // 打卡后延迟2.5秒自动上传（开启自动同步时）
+  function schedulePush(){
+    if(!syncCfg.auto || !syncCfg.token) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(()=>pushCloud(true), 2500);
+  }
+
+  function logKey(){
+    return tab === 'daily' ? 'zxsj-day:' + viewDate : 'zxsj-week:' + weekKeyOf(todayStr());
+  }
+  async function loadLog(){
+    return (await loadKey(logKey())) || {};
+  }
+  function getCount(log, taskId, charId){
+    return (log[taskId] && log[taskId][charId]) || 0;
+  }
+
+  /* ================= 打卡操作 ================= */
+  async function bump(taskId, charId, delta, max){
+    const key = logKey();
+    const log = (await loadLog());
+    if(!log[taskId]) log[taskId] = {};
+    let v = (log[taskId][charId]||0) + delta;
+    v = Math.max(0, Math.min(max, v));
+    log[taskId][charId] = v;
+    await saveKey(key, log);
+    schedulePush();
+    render();
+  }
+  async function toggle(taskId, charId){
+    const key = logKey();
+    const log = await loadLog();
+    if(!log[taskId]) log[taskId] = {};
+    log[taskId][charId] = log[taskId][charId] ? 0 : 1;
+    await saveKey(key, log);
+    schedulePush();
+    render();
+  }
+
+  /* ================= 渲染 ================= */
+  const body = document.getElementById('viewBody');
+
+  async function render(){
+    if(tab === 'settings') return renderSettings();
+    const tasks = tab === 'daily' ? config.daily : config.weekly;
+    const chars = config.chars;
+    const log = await loadLog();
+
+    let html = '';
+    if(tab === 'daily'){
+      const isToday = viewDate === todayStr();
+      html += `<div class="zx-datenav">
+        <button data-act="prev">‹</button>
+        <span class="d">${viewDate}（周${weekday(viewDate)}）${isToday?'· 今天':''}</span>
+        <button data-act="next" ${viewDate>=todayStr()?'disabled style="opacity:.3"':''}>›</button>
+        ${isToday?'':'<button class="today-btn" data-act="today">回今天</button>'}
+      </div>`;
+    }else{
+      const wk = weekKeyOf(todayStr());
+      html += `<div class="zx-datenav"><span class="d">本周（${wk} 起 · 周三8点刷新）</span></div>`;
+    }
+
+    html += '<div class="zx-card"><table class="zx-grid"><thead><tr><th class="taskcol zx-serif">事项</th>';
+    chars.forEach(c => html += `<th><span class="zx-char">${esc(c.name)}</span></th>`);
+    html += '</tr></thead><tbody>';
+
+    tasks.forEach(t=>{
+      html += `<tr><td class="taskname">${esc(t.name)}${t.max>1?`<span class="cnt">×${t.max}</span>`:''}</td>`;
+      chars.forEach(c=>{
+        const v = getCount(log, t.id, c.id);
+        if(t.max > 1){
+          const cls = v>=t.max ? 'full' : (v>0 ? 'part' : '');
+          html += `<td><div class="zx-counter">
+            <button data-bump="-1" data-t="${t.id}" data-c="${c.id}" data-m="${t.max}">−</button>
+            <span class="num ${cls}">${v>=t.max?'✓ ':''}${v}/${t.max}</span>
+            <button data-bump="1" data-t="${t.id}" data-c="${c.id}" data-m="${t.max}">＋</button>
+          </div></td>`;
+        }else{
+          html += `<td><button class="zx-cell ${v?'done':''}" data-toggle="1" data-t="${t.id}" data-c="${c.id}">
+            <span class="ring">${v?'✔':'○'}</span></button></td>`;
+        }
+      });
+      html += '</tr>';
+    });
+
+    // 汇总行
+    html += '<tr class="zx-foot"><td style="text-align:left;padding-left:12px">完成度</td>';
+    chars.forEach(c=>{
+      let done=0;
+      tasks.forEach(t=>{ if(getCount(log,t.id,c.id) >= t.max) done++; });
+      const ok = done===tasks.length && tasks.length>0;
+      html += `<td class="${ok?'ok':''}">${ok?'✦ 全清':done+' / '+tasks.length}</td>`;
+    });
+    html += '</tr></tbody></table></div>';
+
+    if(tab==='weekly'){
+      html += `<div class="zx-note">周常次数于每周三早上8点（服务器时间）刷新。次数类事项点 <b>＋/−</b> 记录，单次事项点圈打卡。</div>`;
+    }else{
+      html += `<div class="zx-note">点圈即打卡；可用 ‹ › 回看/补记之前的日期。事项和角色可在右上角 <b>设置</b> 中增删改。</div>`;
+    }
+    body.innerHTML = html;
+  }
+
+  /* ================= 设置页 ================= */
+  function renderSettings(){
+    const sec = (title, list, kind, withMax) => `
+      <div class="zx-sec" data-kind="${kind}">
+        <h3>${title}</h3>
+        ${list.map(x=>`
+          <div class="zx-item" data-id="${x.id}">
+            <span class="zx-mv"><button class="mv-up" title="上移">▲</button><button class="mv-dn" title="下移">▼</button></span>
+            <input type="text" value="${esc(x.name)}" placeholder="名称">
+            ${withMax?`<span class="lbl">每周次数</span><input type="text" class="times" value="${x.max}">`:''}
+            <button class="zx-del" title="删除">✕</button>
+          </div>`).join('')}
+        <button class="zx-add" data-kind="${kind}">＋ 添加</button>
+      </div>`;
+
+    body.innerHTML =
+      sec('角色', config.chars, 'chars', false) +
+      sec('日常事项（每日重置）', config.daily, 'daily', false) +
+      sec('周常事项（周三重置）', config.weekly, 'weekly', true) +
+      `<div class="zx-sec">
+        <h3>数据备份</h3>
+        <div class="zx-backup">
+          <button class="zx-bk" id="btnExport">⬇ 导出 JSON 备份</button>
+          <button class="zx-bk" id="btnImport">⬆ 从 JSON 恢复</button>
+          <input type="file" id="fileImport" accept=".json,application/json" style="display:none">
+        </div>
+        <div class="zx-note">打卡数据自动保存在本浏览器里。建议定期导出 JSON 备份；换浏览器/换设备时，用「从 JSON 恢复」导入即可。</div>
+      </div>
+      <div class="zx-sec">
+        <h3>云同步（GitHub Gist）</h3>
+        <div class="zx-item"><span class="lbl">Token</span><input type="password" id="syncToken" value="${esc(syncCfg.token)}" placeholder="仅需 gist 权限的 Token"></div>
+        <div class="zx-item"><span class="lbl">Gist ID</span><input type="text" id="syncGist" value="${esc(syncCfg.gist)}" placeholder="留空，首次上传自动创建"></div>
+        <label class="zx-note" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px">
+          <input type="checkbox" id="syncAuto" ${syncCfg.auto?'checked':''}> 打卡后自动上传到云端
+        </label>
+        <div class="zx-backup">
+          <button class="zx-bk" id="btnPush">☁ 上传到云端</button>
+          <button class="zx-bk" id="btnPull">⟳ 从云端拉取</button>
+        </div>
+        <div class="zx-note">数据存到你 GitHub 账号下的私密 Gist，多设备同步。换设备使用时：先填同一个 Token 和 Gist ID，点「从云端拉取」。Token 只保存在本浏览器，不会进入备份文件。</div>
+      </div>
+      <div class="zx-note">删除角色或事项不会清除历史打卡数据，只是不再显示。</div>
+       <div class="zx-savebar"><button class="zx-save" id="saveCfg">保 存</button></div>`;
+  }
+
+  function collectSettings(){
+    const out = {chars:[], daily:[], weekly:[]};
+    document.querySelectorAll('.zx-sec').forEach(sec=>{
+      const kind = sec.dataset.kind;
+      if(!kind || !out[kind]) return;
+      sec.querySelectorAll('.zx-item').forEach(it=>{
+        const name = it.querySelector('input[type=text]').value.trim();
+        if(!name) return;
+        const entry = {id: it.dataset.id, name};
+        if(kind !== 'chars'){
+          const mEl = it.querySelector('.times');
+          entry.max = Math.max(1, parseInt(mEl ? mEl.value : '1', 10) || 1);
+        }
+        out[kind].push(entry);
+      });
+    });
+    return out;
+  }
+
+  /* ================= 事件 ================= */
+  document.querySelectorAll('.zx-tab').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.zx-tab').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      tab = b.dataset.tab;
+      render();
+    });
+  });
+
+  body.addEventListener('click', async e=>{
+    const tgl = e.target.closest('[data-toggle]');
+    if(tgl){ return toggle(tgl.dataset.t, tgl.dataset.c); }
+
+    const bp = e.target.closest('[data-bump]');
+    if(bp){ return bump(bp.dataset.t, bp.dataset.c, parseInt(bp.dataset.bump,10), parseInt(bp.dataset.m,10)); }
+
+    const nav = e.target.closest('[data-act]');
+    if(nav){
+      if(nav.dataset.act==='prev') viewDate = shiftDate(viewDate,-1);
+      if(nav.dataset.act==='next' && viewDate < todayStr()) viewDate = shiftDate(viewDate,1);
+      if(nav.dataset.act==='today') viewDate = todayStr();
+      return render();
+    }
+
+    if(e.target.closest('.zx-del')){
+      e.target.closest('.zx-item').remove();
+      return;
+    }
+    if(e.target.closest('.mv-up')){
+      const it = e.target.closest('.zx-item'), prev = it.previousElementSibling;
+      if(prev && prev.classList.contains('zx-item')) it.parentNode.insertBefore(it, prev);
+      return;
+    }
+    if(e.target.closest('.mv-dn')){
+      const it = e.target.closest('.zx-item'), next = it.nextElementSibling;
+      if(next && next.classList.contains('zx-item')) it.parentNode.insertBefore(next, it);
+      return;
+    }
+    const add = e.target.closest('.zx-add');
+    if(add){
+      const kind = add.dataset.kind;
+      const div = document.createElement('div');
+      div.className = 'zx-item';
+      div.dataset.id = uid(kind[0]);
+      div.innerHTML = `<span class="zx-mv"><button class="mv-up" title="上移">▲</button><button class="mv-dn" title="下移">▼</button></span>
+        <input type="text" value="" placeholder="名称">
+        ${kind==='weekly'?'<span class="lbl">每周次数</span><input type="text" class="times" value="1">':''}
+        <button class="zx-del" title="删除">✕</button>`;
+      add.before(div);
+      div.querySelector('input').focus();
+      return;
+    }
+    if(e.target.id === 'btnExport'){ return exportJSON(); }
+    if(e.target.id === 'btnImport'){
+      document.getElementById('fileImport').click();
+      return;
+    }
+    if(e.target.id === 'btnPush'){ return pushCloud(false); }
+    if(e.target.id === 'btnPull'){ return pullCloud(); }
+    if(e.target.id === 'saveCfg'){
+      const cfg = collectSettings();
+      if(!cfg.chars.length){ toast('至少保留一个角色'); return; }
+      config = cfg;
+      await saveKey(CONFIG_KEY, config);
+      schedulePush();
+      toast('已保存');
+      tab = 'daily';
+      document.querySelector('.zx-tab[data-tab=daily]').classList.add('on');
+      render();
+    }
+  });
+
+  body.addEventListener('change', async e=>{
+    if(e.target.id === 'fileImport' && e.target.files && e.target.files[0]){
+      importJSON(e.target.files[0]);
+      e.target.value = '';
+      return;
+    }
+    if(['syncToken','syncGist','syncAuto'].includes(e.target.id)){
+      syncCfg.token = (document.getElementById('syncToken')||{}).value?.trim() || '';
+      syncCfg.gist  = (document.getElementById('syncGist')||{}).value?.trim() || '';
+      syncCfg.auto  = !!(document.getElementById('syncAuto')||{}).checked;
+      await saveKey(SYNC_KEY, syncCfg);
+      toast('同步设置已保存');
+    }
+  });
+
+  /* ================= 启动 ================= */
+  (async ()=>{
+    await loadConfig();
+    await loadSync();
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
