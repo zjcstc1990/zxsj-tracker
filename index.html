@@ -2,650 +2,1039 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d141d">
-<title>诛仙世界 · 修行录</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>诛仙世界 · 交易行行情</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14110c;
+  --ink2:#1c1811;
+  --panel:#221d15;
+  --panel2:#2a241a;
+  --line:#3a3226;
+  --line2:#4a4030;
+  --gold:#c9a24b;
+  --gold-soft:#e0c483;
+  --paper:#ece2cf;
+  --paper-dim:#b7ac96;
+  --muted:#8b8069;
+  --jade:#5fb89a;
+  --up:#d8a24a;      /* 涨 amber */
+  --down:#5fb0a6;    /* 跌 teal */
+  --r-liang:#6fbf73; /* 良品 */
+  --r-zhen:#5aa9e6;  /* 珍品 */
+  --r-ling:#b57ce0;  /* 灵品 */
+  --r-xian:#e6b04a;  /* 仙品 */
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(201,162,75,.10), transparent 60%),
+    linear-gradient(180deg,#17130d 0%, var(--ink) 40%);
+  color:var(--paper);
+  font-family:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
+
+/* header */
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:14px}
+.seal{width:46px;height:46px;flex:none;border:1.5px solid var(--gold);border-radius:8px;
+  display:grid;place-items:center;color:var(--gold);font-family:"Noto Serif SC",serif;font-weight:900;
+  font-size:24px;background:linear-gradient(160deg,rgba(201,162,75,.14),transparent);
+  box-shadow:inset 0 0 18px rgba(201,162,75,.10)}
+h1{font-family:"Noto Serif SC",serif;font-weight:900;font-size:26px;margin:0;letter-spacing:2px;color:var(--paper)}
+.sub{color:var(--muted);font-size:12.5px;margin-top:3px;letter-spacing:.5px}
+.hdr-stats{display:flex;gap:22px;align-items:flex-end}
+.stat{text-align:right}
+.stat b{font-family:"Noto Serif SC",serif;font-size:22px;color:var(--gold-soft);font-weight:700;font-variant-numeric:tabular-nums}
+.stat span{display:block;color:var(--muted);font-size:11px;letter-spacing:1px;margin-top:2px}
+
+/* toolbar */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{background:transparent;border:1px solid var(--line);color:var(--paper-dim);
+  padding:7px 15px;border-radius:20px;cursor:pointer;font-size:13.5px;font-family:inherit;
+  transition:.16s;letter-spacing:.5px}
+.tab:hover{border-color:var(--line2);color:var(--paper)}
+.tab.active{background:linear-gradient(180deg,rgba(201,162,75,.22),rgba(201,162,75,.08));
+  border-color:var(--gold);color:var(--gold-soft);font-weight:700}
+.tab .n{opacity:.6;font-size:11.5px;margin-left:4px}
+.actions{display:flex;gap:8px}
+.btn{font-family:inherit;cursor:pointer;border-radius:8px;font-size:13.5px;padding:8px 16px;
+  border:1px solid var(--line2);background:var(--panel2);color:var(--paper);transition:.16s;letter-spacing:.5px}
+.btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+.btn.primary{background:linear-gradient(180deg,#c9a24b,#a9863a);color:#1a1509;border-color:#d8b666;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08);color:#1a1509}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 11px;font-size:12.5px;border-radius:7px}
+
+/* pending banner */
+.pending{display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border:1px solid var(--gold);background:linear-gradient(180deg,rgba(201,162,75,.14),rgba(201,162,75,.04));
+  border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.pending.show{display:flex}
+.pending .msg{color:var(--gold-soft);font-size:14px}
+.pending .msg b{font-family:"Noto Serif SC",serif}
+
+/* table */
+.card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,var(--ink2),var(--ink))}
+table{width:100%;border-collapse:collapse}
+thead th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:1px;text-align:right;
+  padding:12px 14px;background:var(--panel);border-bottom:1px solid var(--line);white-space:nowrap}
+thead th.l{text-align:left}
+tbody tr{border-bottom:1px solid rgba(58,50,38,.55);cursor:pointer;transition:background .14s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(201,162,75,.055)}
+td{padding:11px 14px;text-align:right;font-size:14px;vertical-align:middle;font-variant-numeric:tabular-nums}
+td.l{text-align:left}
+.item-cell{display:flex;align-items:center;gap:10px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor}
+.name{font-weight:500}
+.name .catlabel{color:var(--muted);font-size:11.5px;margin-left:8px;font-weight:400}
+.badge{font-size:11px;padding:2px 8px;border-radius:5px;font-weight:700;letter-spacing:.5px;
+  border:1px solid currentColor;background:rgba(255,255,255,.03)}
+.price{font-family:"Noto Serif SC",serif;font-weight:700;color:var(--paper)}
+.price .ingot{color:var(--jade);font-size:11px;margin-left:3px;opacity:.85;font-family:inherit;font-weight:400}
+.chg{font-weight:700;font-size:13px;white-space:nowrap}
+.chg.up{color:var(--up)}
+.chg.down{color:var(--down)}
+.chg.flat{color:var(--muted)}
+.qty{color:var(--paper-dim)}
+.spark{display:inline-block;vertical-align:middle}
+.rowbtn{background:transparent;border:1px solid var(--line2);color:var(--paper-dim);border-radius:6px;
+  padding:4px 9px;font-size:12px;cursor:pointer;font-family:inherit;transition:.14s}
+.rowbtn:hover{border-color:var(--gold);color:var(--gold-soft)}
+.empty{padding:56px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;font-family:"Noto Serif SC",serif;color:var(--paper-dim);font-size:17px;margin-bottom:8px}
+
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(8,6,3,.72);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.mask.show{display:flex}
+.modal{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);
+  border-radius:14px;width:100%;max-width:640px;max-height:86vh;overflow:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,.55)}
+.modal.wide{max-width:820px}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.mhead h3{margin:0;font-family:"Noto Serif SC",serif;font-size:19px;color:var(--gold-soft);letter-spacing:1px;font-weight:700}
+.mclose{background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px}
+.mclose:hover{color:var(--paper)}
+.mbody{padding:20px 22px}
+textarea{width:100%;min-height:170px;background:var(--ink);border:1px solid var(--line2);border-radius:9px;
+  color:var(--paper);font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+  padding:12px 14px;resize:vertical;line-height:1.55}
+textarea:focus{outline:none;border-color:var(--gold)}
+.hint{color:var(--muted);font-size:12.5px;line-height:1.7;margin:12px 0 0}
+.hint code{background:var(--ink);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--gold-soft);font-size:12px}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+
+/* import: segmented control */
+.segbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.seg{font-family:inherit;font-size:13.5px;padding:7px 15px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--line2);background:transparent;color:var(--paper-dim);transition:.16s;letter-spacing:.5px}
+.seg:hover{border-color:var(--gold);color:var(--paper)}
+.seg.active{background:linear-gradient(180deg,rgba(201,162,75,.2),rgba(201,162,75,.06));
+  border-color:var(--gold);color:var(--gold-soft);font-weight:700}
+.datepick{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:8px}
+input[type=date]{background:var(--ink);border:1px solid var(--line2);border-radius:8px;color:var(--paper);
+  padding:6px 10px;font-family:inherit;font-size:13px;color-scheme:dark}
+input[type=date]:focus{outline:none;border-color:var(--gold)}
+
+/* dropzone */
+.drop{border:1.5px dashed var(--line2);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;
+  transition:.18s;background:linear-gradient(180deg,rgba(201,162,75,.03),transparent)}
+.drop:hover,.drop:focus-visible,.drop.over{border-color:var(--gold);background:rgba(201,162,75,.07);outline:none}
+.dropicon{font-family:"Noto Serif SC",serif;font-size:26px;color:var(--gold);opacity:.75;margin-bottom:8px}
+.droptitle{font-family:"Noto Serif SC",serif;font-size:16px;color:var(--paper);letter-spacing:1px}
+.dropsub{color:var(--muted);font-size:12.5px;margin-top:7px;line-height:1.6}
+.shots{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.shot{position:relative;width:96px;height:58px;border-radius:7px;overflow:hidden;border:1px solid var(--line2);background:var(--ink)}
+.shot img{width:100%;height:100%;object-fit:cover;opacity:.85}
+.shot .x{position:absolute;top:2px;right:2px;background:rgba(10,8,4,.82);border:none;color:var(--paper-dim);
+  width:19px;height:19px;border-radius:50%;cursor:pointer;font-size:13px;line-height:1}
+.shot .x:hover{color:#fff;background:#000}
+.shot .tag{position:absolute;bottom:0;left:0;right:0;background:rgba(10,8,4,.8);color:var(--gold-soft);
+  font-size:10.5px;text-align:center;padding:2px 0}
+.readstate{margin-top:14px;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:9px;min-height:20px}
+.readstate.err{color:#e2907f}
+.spin{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--gold);border-radius:50%;
+  animation:sp .7s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+
+/* staging table */
+.stagehead{font-family:"Noto Serif SC",serif;font-size:14px;color:var(--gold-soft);letter-spacing:1px;
+  margin:18px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.stagehead span{color:var(--muted);font-family:"Noto Sans SC",sans-serif;font-weight:400;font-size:12.5px;margin-left:6px}
+.stagewrap{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.stage-table{width:100%;border-collapse:collapse;font-size:13px}
+.stage-table th{position:sticky;top:0;background:var(--panel);color:var(--muted);font-weight:500;font-size:11.5px;
+  letter-spacing:.5px;text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);z-index:1}
+.stage-table th.l{text-align:left}
+.stage-table td{padding:6px 10px;text-align:right;border-bottom:1px solid rgba(58,50,38,.5)}
+.stage-table td.l{text-align:left}
+.stage-table tr:last-child td{border-bottom:none}
+.stage-table tr.isnew{background:rgba(201,162,75,.06)}
+.stage-table tr.skip{opacity:.4}
+.si{background:var(--ink);border:1px solid var(--line);border-radius:6px;color:var(--paper);
+  padding:5px 8px;font-family:inherit;font-size:12.5px;width:100%;min-width:60px}
+.si:focus{outline:none;border-color:var(--gold)}
+.si.num{text-align:right;font-variant-numeric:tabular-nums}
+.si.name{min-width:110px}
+.newtag{font-size:10px;color:var(--gold-soft);border:1px solid var(--gold);border-radius:4px;
+  padding:1px 5px;margin-left:6px;vertical-align:middle}
+.stage-table select.si{min-width:92px}
+
+/* filtered-by-blacklist note */
+.filtered{margin-top:14px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:8px;
+  padding:10px 14px;color:var(--paper-dim);font-size:12.5px;background:rgba(201,162,75,.05);line-height:1.7}
+.filtered b{color:var(--gold-soft)}
+/* detail mode bar */
+.modebar{display:flex;align-items:center;gap:8px;margin:6px 0 12px}
+.modebar .seg{padding:5px 13px;font-size:12.5px}
+.modehint{color:var(--muted);font-size:12px;margin-left:4px}
+input[type=datetime-local]{background:var(--ink);border:1px solid var(--line2);border-radius:8px;color:var(--paper);
+  padding:6px 10px;font-family:inherit;font-size:13px;color-scheme:dark}
+input[type=datetime-local]:focus{outline:none;border-color:var(--gold)}
+
+/* pending review list */
+.plist{display:flex;flex-direction:column;gap:8px;margin:4px 0 8px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:9px;background:var(--ink2)}
+.prow .pn{display:flex;align-items:center;gap:9px}
+.prow .pmeta{color:var(--muted);font-size:12px}
+.prow .pact{display:flex;gap:7px}
+
+/* manage sections */
+.msec{margin-bottom:22px}
+.msec h4{margin:0 0 10px;font-size:13px;color:var(--gold-soft);letter-spacing:1px;font-weight:700;
+  font-family:"Noto Serif SC",serif;border-bottom:1px solid var(--line);padding-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);border-radius:18px;
+  padding:5px 6px 5px 12px;font-size:13px;color:var(--paper-dim);background:var(--ink2)}
+.chip button{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:15px;
+  width:20px;height:20px;border-radius:50%;line-height:1}
+.chip button:hover{background:var(--line2);color:var(--paper)}
+.chip.restore button{color:var(--jade)}
+.row-field{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,input[type=text]{background:var(--ink);border:1px solid var(--line2);border-radius:8px;color:var(--paper);
+  padding:8px 11px;font-family:inherit;font-size:13.5px}
+select:focus,input:focus{outline:none;border-color:var(--gold)}
+
+/* detail chart */
+.dhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.dhead .dprice{font-family:"Noto Serif SC",serif;font-size:30px;color:var(--gold-soft);font-weight:700;font-variant-numeric:tabular-nums}
+.dmeta{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;margin:10px 0 18px}
+.dmeta b{color:var(--paper-dim);font-weight:500}
+.chartbox{background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:14px 8px 6px}
+.hist-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}
+.hist-table th{color:var(--muted);text-align:right;padding:7px 10px;font-weight:500;border-bottom:1px solid var(--line)}
+.hist-table th.l{text-align:left}
+.hist-table td{padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums}
+.hist-table td.l{text-align:left;color:var(--paper-dim)}
+
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--panel2);border:1px solid var(--gold);color:var(--gold-soft);padding:11px 20px;border-radius:10px;
+  font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.foot{color:var(--muted);font-size:11.5px;text-align:center;margin-top:26px;letter-spacing:.5px;line-height:1.8}
+
+@media(max-width:720px){
+  .wrap{padding:18px 12px 70px}
+  h1{font-size:21px}
+  .hdr-stats{gap:16px}
+  .stat b{font-size:18px}
+  thead th.hide,td.hide{display:none}
+  td,thead th{padding:9px 8px;font-size:13px}
+  .name .catlabel{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 </head>
 <body>
-<!-- 诛仙世界 S4 日常/周常 打卡 -->
-<style>
-  :root{
-    --ink:#0d141d;          /* 墨夜 */
-    --panel:#151f2b;        /* 青黛 */
-    --panel2:#1b2735;
-    --line:#26374a;
-    --jade:#5fc9a6;         /* 玉青 */
-    --jade-dim:#2c5b4d;
-    --gold:#d9b36c;         /* 鎏金 */
-    --text:#e9eee9;
-    --muted:#8595a3;
-    --danger:#d97b6c;
-    --radius:12px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body,#zx-root{background:var(--ink);}
-  #zx-root{
-    color:var(--text);
-    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
-    min-height:100vh;padding:16px 14px 48px;max-width:760px;margin:0 auto;
-  }
-  .zx-serif{font-family:"Kaiti SC","KaiTi","STKaiti","Noto Serif SC",serif;}
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="seal">易</div>
+      <div>
+        <h1>交易行 · 行情</h1>
+        <div class="sub">诛仙世界 &nbsp;·&nbsp; 一口价追踪与走势</div>
+      </div>
+    </div>
+    <div class="hdr-stats">
+      <div class="stat"><b id="s-items">0</b><span>追踪物品</span></div>
+      <div class="stat"><b id="s-snaps">0</b><span>记录天数</span></div>
+      <div class="stat"><b id="s-date">—</b><span>最近更新</span></div>
+    </div>
+  </header>
 
-  /* ---------- header ---------- */
-  .zx-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
-    padding:6px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:14px;}
-  .zx-title{font-size:26px;letter-spacing:4px;line-height:1.2}
-  .zx-title small{display:block;font-size:12px;letter-spacing:6px;color:var(--gold);margin-top:4px;font-family:inherit}
-  .zx-gear{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
-    padding:6px 12px;font-size:13px;cursor:pointer}
-  .zx-gear:hover{color:var(--jade);border-color:var(--jade-dim)}
-
-  /* ---------- tabs ---------- */
-  .zx-tabs{display:flex;gap:8px;margin-bottom:14px}
-  .zx-tab{flex:1;padding:10px 0;text-align:center;border:1px solid var(--line);border-radius:var(--radius);
-    background:var(--panel);color:var(--muted);cursor:pointer;font-size:15px;letter-spacing:3px;}
-  .zx-tab.on{color:var(--ink);background:linear-gradient(135deg,var(--jade),#8fd9be);border-color:var(--jade);font-weight:600}
-
-  /* ---------- date nav ---------- */
-  .zx-datenav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px;color:var(--muted);font-size:14px}
-  .zx-datenav button{background:none;border:1px solid var(--line);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px}
-  .zx-datenav button:hover{color:var(--jade)}
-  .zx-datenav .d{min-width:150px;text-align:center;color:var(--text)}
-  .zx-datenav .d small{display:block;color:var(--muted);font-size:11px;margin-top:3px;letter-spacing:.5px}
-  .zx-datenav .today-btn{width:auto;padding:0 10px;font-size:12px;color:var(--gold);border-color:#4a4030}
-
-  /* ---------- grid ---------- */
-  .zx-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  table.zx-grid{width:100%;border-collapse:collapse;table-layout:fixed}
-  .zx-grid th,.zx-grid td{border-bottom:1px solid var(--line);padding:0;text-align:center}
-  .zx-grid th{padding:10px 6px;font-size:14px;font-weight:600;background:var(--panel2)}
-  .zx-grid th.taskcol{width:38%}
-  .zx-grid th .zx-char{color:var(--jade);letter-spacing:1px}
-  .zx-grid td.taskname{text-align:left;padding:11px 12px;font-size:14px;line-height:1.35}
-  .zx-grid td.taskname .cnt{color:var(--muted);font-size:12px;margin-left:4px}
-  .zx-grid tr:last-child td{border-bottom:none}
-
-  .zx-cell{width:100%;height:100%;min-height:46px;border:none;background:none;cursor:pointer;
-    color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px}
-  .zx-cell:hover{background:rgba(95,201,166,.06)}
-  .zx-cell.done{color:var(--jade);font-weight:600}
-  .zx-cell .ring{font-size:18px;line-height:1}
-  .zx-cell.done .ring{text-shadow:0 0 10px rgba(95,201,166,.5)}
-
-  .zx-counter{display:flex;align-items:center;justify-content:center;gap:2px;min-height:46px;padding:4px 2px}
-  .zx-counter .num{font-size:14px;min-width:44px;color:var(--muted)}
-  .zx-counter .num.full{color:var(--jade);font-weight:700}
-  .zx-counter .num.part{color:var(--gold)}
-  .zx-counter button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);
-    background:var(--panel2);color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
-  .zx-counter button:hover{color:var(--jade);border-color:var(--jade-dim)}
-
-  .zx-foot td{padding:9px 6px;font-size:12px;color:var(--muted);background:var(--panel2)}
-  .zx-foot .ok{color:var(--jade)}
-
-  .zx-note{color:var(--muted);font-size:12px;margin:10px 4px 0;line-height:1.6}
-  .zx-note b{color:var(--gold);font-weight:600}
-
-  /* ---------- settings ---------- */
-  .zx-sec{margin-bottom:22px}
-  .zx-sec h3{font-size:15px;letter-spacing:2px;color:var(--gold);margin:0 2px 10px;font-weight:600}
-  .zx-item{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
-    border-radius:10px;padding:8px 10px;margin-bottom:8px}
-  .zx-item input[type=text]{flex:1;background:none;border:none;color:var(--text);font-size:14px;outline:none;min-width:0}
-  .zx-item input.times{flex:0 0 52px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:4px 2px;color:var(--gold)}
-  .zx-item .lbl{font-size:11px;color:var(--muted);flex:none}
-  .zx-del{flex:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px}
-  .zx-del:hover{color:var(--danger)}
-  .zx-mv{flex:none;display:flex;flex-direction:column;gap:1px}
-  .zx-mv button{background:none;border:none;color:var(--line);cursor:pointer;font-size:9px;line-height:1.1;padding:1px 4px}
-  .zx-mv button:hover{color:var(--jade)}
-  .zx-backup{display:flex;gap:8px}
-  .zx-bk{flex:1;padding:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--panel);
-    color:var(--text);cursor:pointer;font-size:13px}
-  .zx-bk:hover{color:var(--jade);border-color:var(--jade-dim)}
-  .zx-add{width:100%;padding:9px 0;border:1px dashed var(--line);border-radius:10px;background:none;
-    color:var(--muted);cursor:pointer;font-size:13px}
-  .zx-add:hover{color:var(--jade);border-color:var(--jade-dim)}
-  .zx-savebar{position:sticky;bottom:0;padding:12px 0 4px;background:linear-gradient(transparent,var(--ink) 30%)}
-  .zx-save{width:100%;padding:12px 0;border:none;border-radius:var(--radius);cursor:pointer;
-    background:linear-gradient(135deg,var(--jade),#8fd9be);color:var(--ink);font-size:15px;font-weight:700;letter-spacing:4px}
-  .zx-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--panel2);
-    border:1px solid var(--jade-dim);color:var(--jade);padding:8px 18px;border-radius:20px;font-size:13px;
-    opacity:0;transition:opacity .25s;pointer-events:none;z-index:9}
-  .zx-toast.show{opacity:1}
-  .zx-loading{text-align:center;color:var(--muted);padding:60px 0;font-size:14px;letter-spacing:2px}
-
-  @media (max-width:480px){
-    .zx-title{font-size:21px;letter-spacing:2px}
-    .zx-grid td.taskname{font-size:13px;padding:9px 8px}
-    .zx-grid th{font-size:12.5px;padding:9px 3px}
-    .zx-counter button{width:24px;height:24px}
-    .zx-counter .num{min-width:38px;font-size:13px}
-  }
-</style>
-
-<div id="zx-root">
-  <div class="zx-head">
-    <div class="zx-title zx-serif">诛仙世界 · 修行录
-      <small>S4 碧落凡心 · 日常周常打卡</small>
+  <div class="toolbar">
+    <div class="tabs" id="tabs"></div>
+    <div class="actions">
+      <button class="btn primary" onclick="openImport()">导入行情</button>
+      <button class="btn ghost" onclick="openManage()">管理</button>
     </div>
   </div>
 
-  <div class="zx-tabs">
-    <button class="zx-tab on" data-tab="daily">日 常</button>
-    <button class="zx-tab" data-tab="weekly">周 常</button>
-    <button class="zx-tab" data-tab="settings">⚙ 编 辑</button>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th class="l">物品</th>
+          <th class="hide">品质</th>
+          <th class="hide">在售量</th>
+          <th>一口价</th>
+          <th>涨跌</th>
+          <th class="hide">走势</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">
+      <b>此分类暂无追踪物品</b>
+      发送新的截图给我提取行情,或点「导入行情」粘贴数据。
+    </div>
   </div>
 
-  <div id="viewBody"><div class="zx-loading">灵气汇聚中…</div></div>
+  <div class="foot">
+    数据保存在本机浏览器(localStorage)· 换设备请用「管理 → 备份」导出<br>
+    每次发我新截图,我会给出可直接粘贴的行情 JSON
+  </div>
 </div>
-<div class="zx-toast" id="toast"></div>
+
+<!-- Import modal -->
+<div class="mask" id="m-import">
+  <div class="modal wide">
+    <div class="mhead"><h3>导入行情</h3><button class="mclose" onclick="closeAll()">×</button></div>
+    <div class="mbody">
+      <div class="segbar">
+        <button class="seg active" id="seg-shot" onclick="setMode('shot')">上传截图</button>
+        <button class="seg" id="seg-json" onclick="setMode('json')">粘贴 JSON</button>
+        <label class="datepick">记录时间
+          <input type="datetime-local" id="import-ts">
+        </label>
+      </div>
+
+      <!-- screenshot path -->
+      <div id="pane-shot">
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="选择或拖入交易行截图">
+          <div class="dropicon">箓</div>
+          <div class="droptitle">拖入截图,或点此选择</div>
+          <div class="dropsub">可一次多张 · 支持 PNG / JPG · 直接读取物品、品质、一口价、在售量</div>
+          <input type="file" id="file" accept="image/*" multiple hidden>
+        </div>
+        <div class="shots" id="shots"></div>
+        <div class="readstate" id="readstate"></div>
+      </div>
+
+      <!-- json path -->
+      <div id="pane-json" style="display:none">
+        <textarea id="import-text" placeholder='{&#10;  "date": "2026-07-21",&#10;  "items": [&#10;    { "name": "月魄残痕", "category": "关注", "quality": "灵品", "price": 996800, "qty": 69 }&#10;  ]&#10;}'></textarea>
+        <p class="hint">
+          <code>price</code> 填原始数字(118.5万 → <code>1185000</code>)。已有物品追加当天记录,同日重复导入会覆盖。
+        </p>
+      </div>
+
+      <div class="filtered" id="filtered-note" style="display:none"></div>
+
+      <!-- staging review -->
+      <div id="stage" style="display:none">
+        <h4 class="stagehead">核对识别结果 <span id="stage-n"></span></h4>
+        <div class="stagewrap">
+          <table class="stage-table">
+            <thead><tr>
+              <th class="l">物品</th><th>品质</th><th>一口价</th><th>在售量</th><th>分类</th><th>处理</th>
+            </tr></thead>
+            <tbody id="stage-rows"></tbody>
+          </table>
+        </div>
+        <p class="hint">识别有误可直接在表里改。新物品标「新」,选「不再提示」后以后自动过滤。</p>
+      </div>
+
+      <div class="mfoot">
+        <button class="btn ghost" onclick="closeAll()">取消</button>
+        <button class="btn ghost" id="btn-json" style="display:none" onclick="parseJsonToStage()">解析</button>
+        <button class="btn primary" id="btn-commit" style="display:none" onclick="commitStage()">确认入库</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="mask" id="m-detail">
+  <div class="modal wide">
+    <div class="mhead"><h3 id="d-title">—</h3><button class="mclose" onclick="closeAll()">×</button></div>
+    <div class="mbody" id="d-body"></div>
+  </div>
+</div>
+
+<!-- Manage modal -->
+<div class="mask" id="m-manage">
+  <div class="modal">
+    <div class="mhead"><h3>管理</h3><button class="mclose" onclick="closeAll()">×</button></div>
+    <div class="mbody" id="manage-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-(function(){
-  /* ================= 默认配置 ================= */
-  const DEFAULT_CONFIG = {
-    chars: [
-      {id:'c1', name:'猪猪萌萌哒'},
-      {id:'c3', name:'嘉嘉美美哒'},
-      {id:'c2', name:'小奶妈'}
-    ],
-    daily: [
-      {id:'d1', name:'活动（星历日常）', max:1},
-      {id:'d2', name:'仙符', max:1},
-      {id:'d3', name:'帮派 · 阵法补灵', max:1},
-      {id:'d4', name:'帮派 · 沐灵', max:1},
-      {id:'d5', name:'帮派 · 云间参悟', max:1},
-      {id:'d6', name:'仙府演武（挂机收菜）', max:1},
-      {id:'d7', name:'宠物远游 / 炼丹', max:1}
-    ],
-    weekly: [
-      {id:'w1', name:'邪枭事件', max:3},
-      {id:'w2', name:'风云事件', max:10},
-      {id:'w3', name:'爬塔 · 单人', max:1},
-      {id:'w4', name:'爬塔 · 双人', max:1},
-      {id:'w5', name:'世界BOSS', max:1},
-      {id:'w6', name:'天玺', max:1},
-      {id:'w7', name:'小队副本（5人）', max:1},
-      {id:'w8', name:'团队副本（10人）', max:1},
-      {id:'w9', name:'镜妖周礼', max:1},
-      {id:'w10', name:'帮派活跃度奖励领取', max:1}
-    ]
+const KEY='zxsj_tracker_v3';
+const QUAL={ '良品':'--r-liang','珍品':'--r-zhen','灵品':'--r-ling','仙品':'--r-xian' };
+let db;
+let activeCat='全部';
+let detailMode='daily';
+let detailName='';
+
+/* ---------- time helpers ---------- */
+function p2(n){return String(n).padStart(2,'0');}
+function nowTs(){const d=new Date();
+  return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes());}
+function dayOf(ts){return (ts||'').slice(0,10);}
+function timeOf(ts){return (ts||'').slice(11,16);}
+function tval(ts){const d=new Date((ts||'').replace(' ','T'));const v=d.getTime();return isFinite(v)?v:0;}
+function fmtTs(ts){return dayOf(ts).slice(5)+' '+timeOf(ts);}
+
+/* ---------- seed ---------- */
+function seed(){
+  const ts='2026-07-21T20:00';
+  const raw=[
+    ['关注','仙品','女娲石',null,0],
+    ['关注','灵品','月魄残痕',996800,69],
+    ['关注','灵品','归藏碎玉',1185000,64],
+    ['关注','灵品','方舆灵屑',1038000,79],
+    ['关注','灵品','异之精髓',893,1618],
+    ['关注','灵品','鸿蒙神藏',154900,399],
+    ['关注','灵品','玄曜宝匣',7210,2766],
+    ['灵矿','珍品','玄脉髓',60,869],
+    ['灵矿','灵品','玄脉晶',67,2087],
+    ['灵矿','良品','雷碃砖',89,2647],
+    ['灵矿','良品','雄黄霜',89,1791],
+    ['灵矿','良品','石英棉·陈',99,1031],
+    ['灵矿','良品','黄铜矿',107,2497],
+    ['灵矿','良品','绯云石',107,666],
+    ['灵矿','灵品','玄脉元',119,1316],
+    ['灵矿','良品','点翠晶',128,1555],
+    ['灵草','灵品','灵草须·陈',190,56],
+    ['灵草','良品','都夷露',215,2705],
+    ['灵草','良品','芒草塔',276,2415],
+    ['灵草','良品','半边莲尖',278,609],
+    ['灵草','珍品','玄芝叶',400,1401],
+    ['灵草','灵品','玄芝芯',428,1798],
+    ['灵草','良品','无条茧',888,270],
+    ['灵草','良品','萤火萼·陈',6499,49],
+    ['灵草','良品','天楠黄·陈',649900,10],
+  ];
+  const items={};
+  raw.forEach(([cat,q,name,price,qty])=>{
+    items[name]={category:cat,quality:q,status:'tracked',history:[{ts,price:price||null,qty}]};
+  });
+  return {version:3,items,catOrder:['关注','灵矿','灵草']};
+}
+
+/* ---------- storage + migration ---------- */
+function migrate(d){
+  if(!d||!d.items)return null;
+  Object.values(d.items).forEach(it=>{
+    if(it.status==='ignored')it.status='blacklist';
+    if(it.status==='pending')it.status='tracked';
+    it.history=(it.history||[]).map(p=>{
+      if(p.ts)return p;
+      return {ts:(p.date||'')+'T20:00',price:p.price??null,qty:p.qty??null};
+    });
+  });
+  d.version=3;
+  return d;
+}
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(KEY));const m=migrate(d);if(m)return m;}catch(e){}
+  try{const old=JSON.parse(localStorage.getItem('zxsj_tracker_v2'));const m=migrate(old);
+    if(m){localStorage.setItem(KEY,JSON.stringify(m));return m;}}catch(e){}
+  const s=seed();
+  try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
+  return s;
+}
+function save(d){
+  if(d)db=d;
+  try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}
+}
+
+/* ---------- history helpers ---------- */
+function cleanHist(h){
+  const m={};
+  (h||[]).forEach(p=>{const ts=p.ts||((p.date||'')+'T20:00');
+    m[ts]={ts,price:p.price??null,qty:p.qty??null};});
+  return Object.values(m).sort((a,b)=>tval(a.ts)-tval(b.ts));
+}
+function pricePoints(h){return cleanHist(h).filter(p=>p.price!=null);}
+/* 每日最后一条 = 当日收盘 */
+function dayPoints(h){
+  const byDay={};
+  pricePoints(h).forEach(p=>{byDay[dayOf(p.ts)]=p;});
+  return Object.values(byDay).sort((a,b)=>tval(a.ts)-tval(b.ts));
+}
+/* 日环比:最新 vs 上一个「不同日期」的记录 */
+function changeDoD(h){
+  const pts=pricePoints(h);
+  if(pts.length<2)return null;
+  const last=pts[pts.length-1],d=dayOf(last.ts);
+  for(let i=pts.length-2;i>=0;i--){
+    if(dayOf(pts[i].ts)<d){
+      const b=pts[i].price;if(!b)return null;
+      return {pct:(last.price-b)/b*100,from:pts[i],to:last};
+    }
+  }
+  return null;
+}
+/* 相邻两次记录之比(可能是同日不同时段) */
+function changeLast(h){
+  const pts=pricePoints(h);
+  if(pts.length<2)return null;
+  const a=pts[pts.length-1],b=pts[pts.length-2];
+  if(!b.price)return null;
+  return {pct:(a.price-b.price)/b.price*100,from:b,to:a};
+}
+function latestPoint(h){const p=pricePoints(h);return p.length?p[p.length-1]:null;}
+function latestPrice(h){const p=latestPoint(h);return p?p.price:null;}
+function latestAny(h){const p=cleanHist(h);return p.length?p[p.length-1]:null;}
+
+function allCats(){
+  const set=[];(db.catOrder||[]).forEach(c=>set.push(c));
+  Object.values(db.items).forEach(it=>{if(!set.includes(it.category))set.push(it.category);});
+  return set;
+}
+function fmtPrice(v){
+  if(v==null)return '—';
+  if(v>=1e8)return trim(v/1e8)+'亿';
+  if(v>=1e4)return trim(v/1e4)+'万';
+  return v.toLocaleString('en-US');
+}
+function trim(n){return (Math.round(n*100)/100).toString();}
+function num(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='number')return isFinite(v)?v:null;
+  let s=String(v).replace(/[,\s银两]/g,'');
+  let mul=1;
+  if(/亿$/.test(s)){mul=1e8;s=s.replace(/亿$/,'');}
+  else if(/万$/.test(s)){mul=1e4;s=s.replace(/万$/,'');}
+  const n=parseFloat(s);
+  return isFinite(n)?Math.round(n*mul):null;
+}
+function esc(s){return (s+'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function enc(s){return encodeURIComponent(s);}
+function dec(s){return decodeURIComponent(s);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ---------- sparkline (按日) ---------- */
+function sparkline(h,w=88,ht=26){
+  const pts=dayPoints(h);
+  if(pts.length<2)return `<svg class="spark" width="${w}" height="${ht}"><line x1="2" y1="${ht/2}" x2="${w-2}" y2="${ht/2}" stroke="var(--line2)" stroke-width="1" stroke-dasharray="2 3"/></svg>`;
+  const vals=pts.map(p=>p.price),min=Math.min(...vals),max=Math.max(...vals),rng=(max-min)||1;
+  const step=(w-6)/(pts.length-1);
+  const xy=vals.map((v,i)=>[3+i*step, ht-3-((v-min)/rng)*(ht-6)]);
+  const d=xy.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const rising=vals[vals.length-1]>=vals[0];
+  const col=rising?'var(--up)':'var(--down)';
+  const last=xy[xy.length-1];
+  return `<svg class="spark" width="${w}" height="${ht}"><path d="${d}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.2" fill="${col}"/></svg>`;
+}
+
+/* ---------- 折线图:时间轴 ---------- */
+function lineChart(h,mode){
+  const pts=(mode==='all')?pricePoints(h):dayPoints(h);
+  const W=760,H=270,padL=64,padR=18,padT=18,padB=44;
+  if(!pts.length)return '<div class="empty" style="padding:36px">暂无价格数据</div>';
+  const vals=pts.map(p=>p.price);
+  let min=Math.min(...vals),max=Math.max(...vals);
+  if(min===max){min=min*0.92;max=max*1.08||1;}
+  const rng=max-min;
+  const t0=tval(pts[0].ts),t1=tval(pts[pts.length-1].ts);
+  const span=t1-t0;
+  const n=pts.length;
+  const X=i=>{
+    if(n===1)return (padL+W-padR)/2;
+    if(span<=0)return padL+i*(W-padL-padR)/(n-1);
+    return padL+(tval(pts[i].ts)-t0)/span*(W-padL-padR);
   };
-
-  const CONFIG_KEY = 'zxsj-config-v1';
-  let config = null;
-  let tab = 'daily';
-  let viewDate = todayStr();          // 日常查看的日期
-  let cache = {};                     // storage 缓存 {key: dataObj}
-
-  /* ================= 工具 =================
-     游戏日：国服每日北京时间 8:00 刷新，恰好等于 UTC 0:00。
-     因此直接用 UTC 日期作为“游戏日”，自动适配本地时区和夏令时。 */
-  function fmtUTC(d){
-    return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+  const Y=v=>padT+(1-(v-min)/rng)*(H-padT-padB);
+  let grid='',labels='';
+  for(let t=0;t<=4;t++){
+    const val=min+rng*t/4,y=Y(val);
+    grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;
+    labels+=`<text x="${padL-8}" y="${(y+4).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="11">${fmtPrice(val)}</text>`;
   }
-  function todayStr(offsetDays){
-    return fmtUTC(new Date(Date.now() + (offsetDays||0)*86400000));
-  }
-  function shiftDate(str, n){
-    const [y,m,dd] = str.split('-').map(Number);
-    return fmtUTC(new Date(Date.UTC(y, m-1, dd) + n*86400000));
-  }
-  // 周常：以周三为一周起点（游戏北京时间周三早8点刷新）
-  function weekKeyOf(dateStr){
-    const [y,m,dd] = dateStr.split('-').map(Number);
-    const d = new Date(Date.UTC(y, m-1, dd));
-    const back = (d.getUTCDay() - 3 + 7) % 7;   // 回退到最近的周三
-    return fmtUTC(new Date(d.getTime() - back*86400000));
-  }
-  function weekday(dateStr){
-    const [y,m,dd] = dateStr.split('-').map(Number);
-    return '日一二三四五六'[new Date(Date.UTC(y,m-1,dd)).getUTCDay()];
-  }
-  // 本地几点切换新的游戏日（= 下一个UTC 0点对应的本地时间）
-  function localResetTime(){
-    const d = new Date();
-    d.setUTCHours(24,0,0,0);
-    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  }
-  // 一个游戏日/游戏周对应的本地时间段，如 "7/9 周四 20:00 → 7/10 周五 20:00"
-  function localRange(dateStr, days){
-    const [y,m,dd] = dateStr.split('-').map(Number);
-    const s = new Date(Date.UTC(y, m-1, dd));
-    const e = new Date(s.getTime() + (days||1)*86400000);
-    const f = d => (d.getMonth()+1)+'/'+d.getDate()+' 周'+'日一二三四五六'[d.getDay()]+' '
-      + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    return f(s)+' → '+f(e);
-  }
-  function uid(p){ return p + Math.random().toString(36).slice(2,8); }
-  function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-  function toast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 1600);
-  }
-
-  /* ================= 存储（自动适配）=================
-     在 Claude 里运行时用 window.storage；
-     部署到网上后自动切换为浏览器 localStorage。 */
-  const hasCS = typeof window.storage === 'object' && window.storage && typeof window.storage.get === 'function';
-
-  async function loadKey(key){
-    if(cache[key] !== undefined) return cache[key];
-    let raw = null;
-    try{
-      if(hasCS){
-        const r = await window.storage.get(key);
-        raw = r ? r.value : null;
-      }else{
-        raw = localStorage.getItem(key);
-      }
-    }catch(e){ raw = null; }
-    try{ cache[key] = raw ? JSON.parse(raw) : null; }
-    catch(e){ cache[key] = null; }
-    return cache[key];
-  }
-  async function saveKey(key, obj){
-    cache[key] = obj;
-    const raw = JSON.stringify(obj);
-    try{
-      if(hasCS) await window.storage.set(key, raw);
-      else localStorage.setItem(key, raw);
-    }catch(e){ toast('保存失败，请重试'); }
-  }
-  async function listKeys(){
-    try{
-      if(hasCS){
-        const r = await window.storage.list('zxsj-');
-        return (r && r.keys) ? r.keys : [];
-      }
-      const out = [];
-      for(let i=0;i<localStorage.length;i++){
-        const k = localStorage.key(i);
-        if(k && k.indexOf('zxsj-')===0) out.push(k);
-      }
-      return out;
-    }catch(e){ return []; }
-  }
-
-  async function loadConfig(){
-    const c = await loadKey(CONFIG_KEY);
-    config = c || JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-    let dirty = !c;
-    // 迁移：老配置补入新角色「嘉嘉美美哒」
-    if(!config.mig1){
-      config.mig1 = true;
-      if(!config.chars.some(x=>x.id==='c3' || x.name==='嘉嘉美美哒')){
-        const i = config.chars.findIndex(x=>x.id==='c1');
-        config.chars.splice(i+1, 0, {id:'c3', name:'嘉嘉美美哒'});
-      }
-      dirty = true;
+  const rising=vals[vals.length-1]>=vals[0];
+  const col=rising?'var(--up)':'var(--down)';
+  const d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.price).toFixed(1)).join(' ');
+  const area=`M${X(0).toFixed(1)} ${(H-padB)} `+pts.map((p,i)=>'L'+X(i).toFixed(1)+' '+Y(p.price).toFixed(1)).join(' ')+` L${X(n-1).toFixed(1)} ${H-padB} Z`;
+  let dots='',xlab='';
+  const every=Math.max(1,Math.ceil(n/6));
+  pts.forEach((p,i)=>{
+    dots+=`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.price).toFixed(1)}" r="3.4" fill="${col}" stroke="var(--ink)" stroke-width="1.5"><title>${fmtTs(p.ts)} · ${fmtPrice(p.price)}银</title></circle>`;
+    if(i%every===0||i===n-1){
+      const lb=(mode==='all')?fmtTs(p.ts):dayOf(p.ts).slice(5);
+      xlab+=`<text x="${X(i).toFixed(1)}" y="${H-padB+21}" text-anchor="middle" fill="var(--muted)" font-size="10.5">${lb}</text>`;
     }
-    if(dirty) await saveKey(CONFIG_KEY, config);
-  }
+  });
+  const one=n===1?`<text x="${((padL+W-padR)/2).toFixed(1)}" y="${(Y(vals[0])-14).toFixed(1)}" text-anchor="middle" fill="var(--muted)" font-size="11">仅一条记录,再传一次即可看到走势</text>`:'';
+  return `<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">
+    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${col}" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    ${grid}${labels}
+    ${n>1?`<path d="${area}" fill="url(#fill)"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`:''}
+    ${dots}${xlab}${one}
+  </svg></div>`;
+}
 
-  /* ================= 备份 / 恢复 ================= */
-  const SYNC_KEY = 'zxsj-sync-v1';
-  let syncCfg = {token:'', gist:'', auto:false};
-  let pushTimer = null;
+/* ---------- 主列表 ---------- */
+function renderTabs(){
+  const cats=allCats(),counts={};let total=0;
+  Object.values(db.items).forEach(it=>{
+    if(it.status==='tracked'){counts[it.category]=(counts[it.category]||0)+1;total++;}
+  });
+  const mk=(id,label,n)=>`<button class="tab ${activeCat===id?'active':''}" onclick="setCat('${enc(id)}')">${esc(label)}<span class="n">${n}</span></button>`;
+  let html=mk('全部','全部',total);
+  cats.forEach(c=>{if(counts[c])html+=mk(c,c,counts[c]);});
+  document.getElementById('tabs').innerHTML=html;
+}
+function setCat(c){activeCat=dec(c);renderTabs();renderRows();}
+function renderStats(){
+  let tracked=0;const days=new Set();let last='';
+  Object.values(db.items).forEach(it=>{
+    if(it.status==='tracked')tracked++;
+    cleanHist(it.history).forEach(p=>{days.add(dayOf(p.ts));if(p.ts>last)last=p.ts;});
+  });
+  document.getElementById('s-items').textContent=tracked;
+  document.getElementById('s-snaps').textContent=days.size;
+  document.getElementById('s-date').textContent=last?fmtTs(last):'—';
+}
+function renderRows(){
+  const tb=document.getElementById('rows');
+  let list=Object.entries(db.items)
+    .filter(([n,it])=>it.status==='tracked')
+    .filter(([n,it])=>activeCat==='全部'||it.category===activeCat);
+  list.sort((a,b)=>{
+    const pa=latestPrice(a[1].history),pb=latestPrice(b[1].history);
+    if(pa==null)return 1;if(pb==null)return -1;return pb-pa;
+  });
+  document.getElementById('empty').style.display=list.length?'none':'block';
+  tb.innerHTML=list.map(([name,it])=>{
+    const lp=latestPrice(it.history);
+    const dod=changeDoD(it.history);
+    let chHtml='<span class="chg flat" title="还没有前一天的记录">—</span>';
+    if(dod){
+      const cls=dod.pct>0.01?'up':(dod.pct<-0.01?'down':'flat');
+      const arw=dod.pct>0.01?'▲':(dod.pct<-0.01?'▼':'–');
+      chHtml=`<span class="chg ${cls}" title="对比 ${fmtTs(dod.from.ts)} 的 ${fmtPrice(dod.from.price)}">${arw} ${Math.abs(dod.pct).toFixed(1)}%</span>`;
+    }
+    const qv=`var(${QUAL[it.quality]||'--muted'})`;
+    const lastAny=latestAny(it.history);
+    return `<tr onclick="openDetail('${enc(name)}')">
+      <td class="l"><div class="item-cell">
+        <span class="dot" style="color:${qv}"></span>
+        <span class="name">${esc(name)}<span class="catlabel">${esc(it.category)}</span></span>
+      </div></td>
+      <td class="hide"><span class="badge" style="color:${qv}">${esc(it.quality||'—')}</span></td>
+      <td class="hide qty">${lastAny&&lastAny.qty!=null?lastAny.qty.toLocaleString('en-US'):'—'}</td>
+      <td><span class="price">${fmtPrice(lp)}<span class="ingot">银</span></span></td>
+      <td>${chHtml}</td>
+      <td class="hide">${sparkline(it.history)}</td>
+      <td><button class="rowbtn" onclick="event.stopPropagation();blacklist('${enc(name)}')">拉黑</button></td>
+    </tr>`;
+  }).join('');
+}
+function renderAll(){renderTabs();renderStats();renderRows();save();}
 
-  async function loadSync(){
-    const s = await loadKey(SYNC_KEY);
-    if(s) syncCfg = s;
-  }
-  async function buildDump(){
-    const keys = await listKeys();
-    const dump = {app:'zxsj-tracker', exportedAt:new Date().toISOString(), data:{}};
-    for(const k of keys){
-      if(k === SYNC_KEY) continue;           // 不备份 token
-      const v = await loadKey(k);
-      if(v !== null) dump.data[k] = v;
+/* ---------- 详情 ---------- */
+function openDetail(encName){detailName=dec(encName);detailMode='daily';renderDetail();show('m-detail');}
+function setDetailMode(m){detailMode=m;renderDetail();}
+function renderDetail(){
+  const name=detailName,it=db.items[name];if(!it)return;
+  const lp=latestPrice(it.history);
+  const dod=changeDoD(it.history),lastc=changeLast(it.history);
+  document.getElementById('d-title').textContent=name;
+  const qv=`var(${QUAL[it.quality]||'--muted'})`;
+  const pct=c=>{const s=c.pct>0?'+':'';const cls=c.pct>0.01?'up':(c.pct<-0.01?'down':'flat');
+    return `<span class="chg ${cls}">${s}${c.pct.toFixed(1)}%</span>`;};
+  const h=cleanHist(it.history);
+  const rows=h.slice().reverse().map((p,i,arr)=>{
+    const prev=arr[i+1];let d='—';
+    if(prev&&prev.price!=null&&p.price!=null&&prev.price!==0){
+      const v=(p.price-prev.price)/prev.price*100;
+      const cls=v>0?'up':(v<0?'down':'flat');
+      d=`<span class="chg ${cls}">${v>0?'+':''}${v.toFixed(1)}%</span>`;
     }
-    return dump;
-  }
-  async function applyDump(data){
-    let n = 0;
-    for(const k in data){
-      if(k.indexOf('zxsj-')!==0 || k===SYNC_KEY) continue;
-      await saveKey(k, data[k]);
-      n++;
-    }
-    cache = {}; config = null;
-    await loadConfig();
-    return n;
-  }
-  async function exportJSON(){
-    const dump = await buildDump();
-    const blob = new Blob([JSON.stringify(dump, null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '诛仙打卡备份-' + todayStr() + '.json';
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-    toast('已导出备份');
-  }
-  async function importJSON(file){
+    return `<tr><td class="l">${dayOf(p.ts)}</td><td class="l" style="color:var(--muted)">${timeOf(p.ts)}</td>
+      <td>${fmtPrice(p.price)}</td><td>${p.qty!=null?p.qty.toLocaleString('en-US'):'—'}</td><td>${d}</td></tr>`;
+  }).join('');
+  document.getElementById('d-body').innerHTML=`
+    <div class="dhead">
+      <span class="dprice">${fmtPrice(lp)} <span style="font-size:14px;color:var(--jade)">银两</span></span>
+      <span class="badge" style="color:${qv}">${esc(it.quality||'—')}</span>
+      <span style="color:var(--muted);font-size:13px">${esc(it.category)}</span>
+    </div>
+    <div class="dmeta">
+      <span>较昨日 ${dod?pct(dod):'<b>暂无对比</b>'}</span>
+      <span>较上次 ${lastc?pct(lastc):'<b>—</b>'}</span>
+      <span>共 <b>${h.length}</b> 次记录 / <b>${dayPoints(it.history).length}</b> 天</span>
+      <span>最新在售 <b>${(latestAny(it.history)||{}).qty??'—'}</b></span>
+    </div>
+    <div class="modebar">
+      <button class="seg ${detailMode==='daily'?'active':''}" onclick="setDetailMode('daily')">按日</button>
+      <button class="seg ${detailMode==='all'?'active':''}" onclick="setDetailMode('all')">逐次</button>
+      <span class="modehint">${detailMode==='daily'?'每天取最后一次记录':'显示每一次上传'}</span>
+    </div>
+    ${lineChart(it.history,detailMode)}
+    <table class="hist-table"><thead><tr><th class="l">日期</th><th class="l">时间</th><th>一口价</th><th>在售量</th><th>较前次</th></tr></thead><tbody>${rows}</tbody></table>
+  `;
+}
+
+/* ---------- 黑名单 ---------- */
+function blacklist(encName){
+  const name=dec(encName);
+  if(db.items[name]){db.items[name].status='blacklist';renderAll();toast('已拉黑「'+name+'」,以后上传会自动跳过');}
+}
+function unblacklist(encName){
+  const name=dec(encName);
+  if(db.items[name]){db.items[name].status='tracked';renderAll();renderManage();toast('已移出黑名单「'+name+'」');}
+}
+function addBlacklistByName(){
+  const el=document.getElementById('bl-new');
+  const name=(el.value||'').trim();
+  if(!name){toast('请输入物品名');return;}
+  if(db.items[name])db.items[name].status='blacklist';
+  else db.items[name]={category:'其他',quality:'',status:'blacklist',history:[]};
+  el.value='';save();renderAll();renderManage();toast('已加入黑名单「'+name+'」');
+}
+function isBlack(name){return db.items[name]&&db.items[name].status==='blacklist';}
+
+/* ---------- 导入:状态 ---------- */
+let shots=[];
+let stage=[];
+let filteredOut=[];
+
+function openImport(){
+  shots=[];stage=[];filteredOut=[];
+  document.getElementById('import-text').value='';
+  document.getElementById('import-ts').value=nowTs();
+  document.getElementById('shots').innerHTML='';
+  setReadState('');setMode('shot');show('m-import');
+}
+function setMode(m){
+  document.getElementById('seg-shot').classList.toggle('active',m==='shot');
+  document.getElementById('seg-json').classList.toggle('active',m==='json');
+  document.getElementById('pane-shot').style.display=m==='shot'?'':'none';
+  document.getElementById('pane-json').style.display=m==='json'?'':'none';
+  document.getElementById('btn-json').style.display=m==='json'?'':'none';
+  stage=[];filteredOut=[];renderStage();
+}
+function setReadState(msg,busy,err){
+  const el=document.getElementById('readstate');
+  el.classList.toggle('err',!!err);
+  el.innerHTML=(busy?'<span class="spin"></span>':'')+esc(msg||'');
+}
+
+/* ---------- 文件接收 ---------- */
+function initDrop(){
+  const drop=document.getElementById('drop'),file=document.getElementById('file');
+  drop.addEventListener('click',()=>file.click());
+  drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();file.click();}});
+  file.addEventListener('change',e=>{addFiles(e.target.files);file.value='';});
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+  drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+  document.addEventListener('paste',e=>{
+    if(!document.getElementById('m-import').classList.contains('show'))return;
+    const f=[...((e.clipboardData&&e.clipboardData.files)||[])].filter(x=>x.type.startsWith('image/'));
+    if(f.length){e.preventDefault();addFiles(f);}
+  });
+}
+function addFiles(list){
+  const imgs=[...list].filter(f=>f.type.startsWith('image/'));
+  if(!imgs.length)return;
+  let pending=imgs.length;
+  imgs.forEach(f=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      const url=r.result;
+      shots.push({id:'s'+Date.now()+Math.random().toString(36).slice(2,6),
+        name:f.name,dataUrl:url,media:f.type,b64:url.split(',')[1],state:'待识别'});
+      renderShots();
+      if(--pending===0)readShots();
+    };
+    r.onerror=()=>{if(--pending===0)readShots();};
+    r.readAsDataURL(f);
+  });
+}
+function renderShots(){
+  document.getElementById('shots').innerHTML=shots.map(s=>
+    `<div class="shot"><img src="${s.dataUrl}" alt="${esc(s.name)}">
+      <button class="x" title="移除" onclick="rmShot('${s.id}')">×</button>
+      <span class="tag">${esc(s.state)}</span></div>`).join('');
+}
+function rmShot(id){shots=shots.filter(s=>s.id!==id);renderShots();}
+
+/* ---------- 视觉识别 ---------- */
+const EXTRACT_PROMPT=`这是手游《诛仙世界》交易行(拍卖行)的截图。请逐行读取表格里的每一个物品,输出 JSON。
+
+表格列依次是:物品名称、品质、等级、数量(在售量)、一口价。
+左侧导航里高亮的那一项是当前分类(如 灵矿、灵草、生产材料、鱼获、食材、材料、消耗品、法宝、道器、境界、配方、工具);若是「我的关注」页面,分类填「关注」。
+
+价格换算规则(务必执行):
+- "99.68万" → 996800
+- "118.5万" → 1185000
+- "64.99万" → 649900
+- "7210" → 7210
+- 价格为 0 或空 → null
+数量同理,输出纯数字,不要带逗号或「万」。
+
+只输出 JSON,不要任何解释文字、不要 markdown 代码块:
+{"category":"分类名","items":[{"name":"物品名","quality":"品质","price":数字或null,"qty":数字}]}`;
+
+async function readShots(){
+  const todo=shots.filter(s=>s.state==='待识别');
+  if(!todo.length)return;
+  let fail=0,i=0;
+  for(const s of todo){
+    s.state='识别中';renderShots();
+    setReadState(`正在读取截图 ${++i}/${todo.length}…`,true);
     try{
-      const text = await file.text();
-      const dump = JSON.parse(text);
-      const n = await applyDump(dump.data || dump);
-      toast('已恢复 ' + n + ' 条记录');
-      render();
-    }catch(e){ toast('文件格式不对，恢复失败'); }
-  }
-
-  /* ================= GitHub Gist 云同步 ================= */
-  function ghHeaders(){
-    return {'Authorization':'Bearer '+syncCfg.token, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json'};
-  }
-  async function pushCloud(silent){
-    if(!syncCfg.token){ if(!silent) toast('请先填写 GitHub Token'); return; }
-    try{
-      const dump = await buildDump();
-      const files = {'zxsj-backup.json': {content: JSON.stringify(dump, null, 2)}};
-      let res;
-      if(syncCfg.gist){
-        res = await fetch('https://api.github.com/gists/'+syncCfg.gist,
-          {method:'PATCH', headers:ghHeaders(), body:JSON.stringify({files})});
-      }else{
-        res = await fetch('https://api.github.com/gists',
-          {method:'POST', headers:ghHeaders(),
-           body:JSON.stringify({description:'诛仙世界打卡数据（自动同步）', public:false, files})});
-      }
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      const j = await res.json();
-      if(!syncCfg.gist && j.id){
-        syncCfg.gist = j.id;
-        await saveKey(SYNC_KEY, syncCfg);
-        const el = document.getElementById('syncGist');
-        if(el) el.value = j.id;
-      }
-      if(!silent) toast('☁ 已上传到云端');
-    }catch(e){ if(!silent) toast('上传失败：'+e.message); }
-  }
-  async function pullCloud(){
-    if(!syncCfg.token || !syncCfg.gist){ toast('请先填写 Token 和 Gist ID'); return; }
-    try{
-      const res = await fetch('https://api.github.com/gists/'+syncCfg.gist, {headers:ghHeaders()});
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      const j = await res.json();
-      const f = j.files && j.files['zxsj-backup.json'];
-      if(!f) throw new Error('云端没有备份文件');
-      let content = f.content;
-      if(f.truncated){
-        const r2 = await fetch(f.raw_url);
-        content = await r2.text();
-      }
-      const dump = JSON.parse(content);
-      const n = await applyDump(dump.data || dump);
-      toast('☁ 已从云端恢复 ' + n + ' 条记录');
-      render();
-    }catch(e){ toast('拉取失败：'+e.message); }
-  }
-  // 打卡后延迟2.5秒自动上传（开启自动同步时）
-  function schedulePush(){
-    if(!syncCfg.auto || !syncCfg.token) return;
-    clearTimeout(pushTimer);
-    pushTimer = setTimeout(()=>pushCloud(true), 2500);
-  }
-
-  function logKey(){
-    return tab === 'daily' ? 'zxsj-day:' + viewDate : 'zxsj-week:' + weekKeyOf(todayStr());
-  }
-  async function loadLog(){
-    return (await loadKey(logKey())) || {};
-  }
-  function getCount(log, taskId, charId){
-    return (log[taskId] && log[taskId][charId]) || 0;
-  }
-
-  /* ================= 打卡操作 ================= */
-  async function bump(taskId, charId, delta, max){
-    const key = logKey();
-    const log = (await loadLog());
-    if(!log[taskId]) log[taskId] = {};
-    let v = (log[taskId][charId]||0) + delta;
-    v = Math.max(0, Math.min(max, v));
-    log[taskId][charId] = v;
-    await saveKey(key, log);
-    schedulePush();
-    render();
-  }
-  async function toggle(taskId, charId){
-    const key = logKey();
-    const log = await loadLog();
-    if(!log[taskId]) log[taskId] = {};
-    log[taskId][charId] = log[taskId][charId] ? 0 : 1;
-    await saveKey(key, log);
-    schedulePush();
-    render();
-  }
-
-  /* ================= 渲染 ================= */
-  const body = document.getElementById('viewBody');
-
-  async function render(){
-    if(tab === 'settings') return renderSettings();
-    const tasks = tab === 'daily' ? config.daily : config.weekly;
-    const chars = config.chars;
-    const log = await loadLog();
-
-    let html = '';
-    if(tab === 'daily'){
-      const isToday = viewDate === todayStr();
-      html += `<div class="zx-datenav">
-        <button data-act="prev">‹</button>
-        <span class="d">游戏日 ${viewDate} 周${weekday(viewDate)}${isToday?' · 今天':''}<small>本地 ${localRange(viewDate)}</small></span>
-        <button data-act="next" ${viewDate>=todayStr()?'disabled style="opacity:.3"':''}>›</button>
-        ${isToday?'':'<button class="today-btn" data-act="today">回今天</button>'}
-      </div>`;
-    }else{
-      const wk = weekKeyOf(todayStr());
-      html += `<div class="zx-datenav"><span class="d">本周 · ${wk} 起<small>本地 ${localRange(wk, 7)}</small></span></div>`;
+      const rows=await extractOne(s);
+      s.state=rows.length+' 项';
+      mergeToStage(rows);
+    }catch(err){
+      console.error(err);s.state='失败';fail++;
+      setReadState(String(err.message||err),false,true);
     }
-
-    html += '<div class="zx-card"><table class="zx-grid"><thead><tr><th class="taskcol zx-serif">事项</th>';
-    chars.forEach(c => html += `<th><span class="zx-char">${esc(c.name)}</span></th>`);
-    html += '</tr></thead><tbody>';
-
-    tasks.forEach(t=>{
-      html += `<tr><td class="taskname">${esc(t.name)}${t.max>1?`<span class="cnt">×${t.max}</span>`:''}</td>`;
-      chars.forEach(c=>{
-        const v = getCount(log, t.id, c.id);
-        if(t.max > 1){
-          const cls = v>=t.max ? 'full' : (v>0 ? 'part' : '');
-          html += `<td><div class="zx-counter">
-            <button data-bump="-1" data-t="${t.id}" data-c="${c.id}" data-m="${t.max}">−</button>
-            <span class="num ${cls}">${v>=t.max?'✓ ':''}${v}/${t.max}</span>
-            <button data-bump="1" data-t="${t.id}" data-c="${c.id}" data-m="${t.max}">＋</button>
-          </div></td>`;
-        }else{
-          html += `<td><button class="zx-cell ${v?'done':''}" data-toggle="1" data-t="${t.id}" data-c="${c.id}">
-            <span class="ring">${v?'✔':'○'}</span></button></td>`;
-        }
-      });
-      html += '</tr>';
-    });
-
-    // 汇总行
-    html += '<tr class="zx-foot"><td style="text-align:left;padding-left:12px">完成度</td>';
-    chars.forEach(c=>{
-      let done=0;
-      tasks.forEach(t=>{ if(getCount(log,t.id,c.id) >= t.max) done++; });
-      const ok = done===tasks.length && tasks.length>0;
-      html += `<td class="${ok?'ok':''}">${ok?'✦ 全清':done+' / '+tasks.length}</td>`;
-    });
-    html += '</tr></tbody></table></div>';
-
-    if(tab==='weekly'){
-      html += `<div class="zx-note">周常次数于每周三早8点（北京时间，即你本地周二 <b>${localResetTime()}</b>）刷新。次数类事项点 <b>＋/−</b> 记录，单次事项点圈打卡。</div>`;
-    }else{
-      html += `<div class="zx-note">按<b>游戏日</b>记录（国服每日北京时间8点刷新）：你本地每天 <b>${localResetTime()}</b> 切换到新的一天，和游戏内完全同步。点圈即打卡；可用 ‹ › 回看/补记。事项和角色可在 <b>⚙ 编辑</b> 中增删改。</div>`;
-    }
-    body.innerHTML = html;
+    renderShots();
   }
+  renderStage();
+  if(stage.length||filteredOut.length){
+    const f=filteredOut.length?` · 已按黑名单过滤 ${filteredOut.length} 项`:'';
+    setReadState(`读取完成 · ${stage.length} 个物品待确认${f}${fail?` · ${fail} 张失败`:''}`);
+  }else if(fail){
+    setReadState('识别失败。可切到「粘贴 JSON」手动录入,或把截图发给 Claude 对话让我生成 JSON。',false,true);
+  }
+}
+async function extractOne(s){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"claude-sonnet-4-6",
+      max_tokens:1000,
+      messages:[{role:"user",content:[
+        {type:"image",source:{type:"base64",media_type:s.media,data:s.b64}},
+        {type:"text",text:EXTRACT_PROMPT}
+      ]}]
+    })
+  });
+  if(!res.ok)throw new Error('识别服务不可用('+res.status+')');
+  const data=await res.json();
+  const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  const clean=text.replace(/```json|```/g,'').trim();
+  const a=clean.indexOf('{'),b=clean.lastIndexOf('}');
+  if(a<0||b<0)throw new Error('返回内容无法解析');
+  const obj=JSON.parse(clean.slice(a,b+1));
+  const cat=(obj.category||'其他').trim();
+  return (obj.items||[]).map(r=>({
+    name:(r.name||'').trim(),quality:(r.quality||'').trim(),
+    price:num(r.price),qty:num(r.qty),category:cat
+  })).filter(r=>r.name);
+}
 
-  /* ================= 设置页 ================= */
-  function renderSettings(){
-    const sec = (title, list, kind, withMax) => `
-      <div class="zx-sec" data-kind="${kind}">
-        <h3>${title}</h3>
-        ${list.map(x=>`
-          <div class="zx-item" data-id="${x.id}">
-            <span class="zx-mv"><button class="mv-up" title="上移">▲</button><button class="mv-dn" title="下移">▼</button></span>
-            <input type="text" value="${esc(x.name)}" placeholder="名称">
-            ${withMax?`<span class="lbl">每周次数</span><input type="text" class="times" value="${x.max}">`:''}
-            <button class="zx-del" title="删除">✕</button>
-          </div>`).join('')}
-        <button class="zx-add" data-kind="${kind}">＋ 添加</button>
-      </div>`;
+/* ---------- 暂存核对 ---------- */
+function mergeToStage(rows){
+  rows.forEach(r=>{
+    if(isBlack(r.name)){
+      if(!filteredOut.includes(r.name))filteredOut.push(r.name);
+      return;
+    }
+    const known=db.items[r.name];
+    const row={...r,isNew:!known,action:'record'};
+    if(known&&(!r.category||r.category==='其他'))row.category=known.category;
+    const i=stage.findIndex(x=>x.name===r.name);
+    if(i>=0)stage[i]=row;else stage.push(row);
+  });
+}
+function renderStage(){
+  const box=document.getElementById('stage'),commit=document.getElementById('btn-commit');
+  const note=document.getElementById('filtered-note');
+  if(filteredOut.length){
+    note.style.display='';
+    note.innerHTML=`黑名单已自动跳过 <b>${filteredOut.length}</b> 项:${filteredOut.map(esc).join('、')}
+      <button class="btn sm ghost" style="margin-left:8px" onclick="unfilterAll()">取回</button>`;
+  }else note.style.display='none';
+  if(!stage.length){box.style.display='none';commit.style.display='none';return;}
+  box.style.display='';commit.style.display='';
+  const n=stage.filter(r=>r.isNew).length;
+  document.getElementById('stage-n').textContent=`共 ${stage.length} 项${n?` · ${n} 个新物品`:''}`;
+  document.getElementById('stage-rows').innerHTML=stage.map((r,i)=>`
+    <tr class="${r.isNew?'isnew':''} ${r.action!=='record'?'skip':''}">
+      <td class="l"><input class="si name" value="${esc(r.name)}" onchange="editStage(${i},'name',this.value)">${r.isNew?'<span class="newtag">新</span>':''}</td>
+      <td><input class="si" style="width:66px" value="${esc(r.quality)}" onchange="editStage(${i},'quality',this.value)"></td>
+      <td><input class="si num" style="width:92px" value="${r.price==null?'':r.price}" onchange="editStage(${i},'price',this.value)"></td>
+      <td><input class="si num" style="width:74px" value="${r.qty==null?'':r.qty}" onchange="editStage(${i},'qty',this.value)"></td>
+      <td><input class="si" style="width:74px" value="${esc(r.category)}" onchange="editStage(${i},'category',this.value)"></td>
+      <td><select class="si" onchange="editStage(${i},'action',this.value)">
+        <option value="record" ${r.action==='record'?'selected':''}>记录</option>
+        <option value="black" ${r.action==='black'?'selected':''}>加入黑名单</option>
+        <option value="skip" ${r.action==='skip'?'selected':''}>本次跳过</option>
+      </select></td>
+    </tr>`).join('');
+}
+function unfilterAll(){
+  filteredOut.forEach(n=>{if(db.items[n])db.items[n].status='tracked';});
+  const names=filteredOut.slice();filteredOut=[];
+  save();renderAll();
+  toast('已取回 '+names.length+' 项,重新识别即可录入');
+  renderStage();
+}
+function editStage(i,field,val){
+  if(field==='price'||field==='qty')stage[i][field]=num(val);
+  else stage[i][field]=String(val).trim();
+  if(field==='name')stage[i].isNew=!db.items[stage[i].name];
+  renderStage();
+}
 
-    body.innerHTML =
-      sec('角色', config.chars, 'chars', false) +
-      sec('日常事项（每日重置）', config.daily, 'daily', false) +
-      sec('周常事项（周三重置）', config.weekly, 'weekly', true) +
-      `<div class="zx-sec">
-        <h3>数据备份</h3>
-        <div class="zx-backup">
-          <button class="zx-bk" id="btnExport">⬇ 导出 JSON 备份</button>
-          <button class="zx-bk" id="btnImport">⬆ 从 JSON 恢复</button>
-          <input type="file" id="fileImport" accept=".json,application/json" style="display:none">
-        </div>
-        <div class="zx-note">打卡数据自动保存在本浏览器里。建议定期导出 JSON 备份；换浏览器/换设备时，用「从 JSON 恢复」导入即可。</div>
+/* ---------- JSON 通道 ---------- */
+function parseJsonToStage(){
+  let data;
+  try{data=JSON.parse(document.getElementById('import-text').value);}
+  catch(e){toast('JSON 格式有误,请检查');return;}
+  const snaps=Array.isArray(data)?data:[data];
+  stage=[];filteredOut=[];
+  snaps.forEach(sn=>{
+    const t=sn.ts||sn.datetime||(sn.date?sn.date+'T20:00':null);
+    if(t)document.getElementById('import-ts').value=t.slice(0,16);
+    mergeToStage((sn.items||[]).map(r=>({
+      name:(r.name||'').trim(),quality:r.quality||'',
+      price:num(r.price),qty:num(r.qty),category:r.category||'其他'
+    })).filter(r=>r.name));
+  });
+  renderStage();
+  if(!stage.length&&!filteredOut.length)toast('没有可导入的物品');
+}
+
+/* ---------- 入库 ---------- */
+function commitStage(){
+  const ts=(document.getElementById('import-ts').value||nowTs()).slice(0,16);
+  const cats=db.catOrder||(db.catOrder=[]);
+  let rec=0,added=0,black=0;
+  stage.forEach(r=>{
+    const name=(r.name||'').trim();if(!name)return;
+    if(r.action==='skip')return;
+    const cat=r.category||'其他';
+    if(r.action==='black'){
+      if(db.items[name])db.items[name].status='blacklist';
+      else db.items[name]={category:cat,quality:r.quality||'',status:'blacklist',history:[]};
+      black++;return;
+    }
+    if(!cats.includes(cat))cats.push(cat);
+    let it=db.items[name];
+    if(!it){it=db.items[name]={category:cat,quality:r.quality||'',status:'tracked',history:[]};added++;}
+    else{it.category=cat;if(r.quality)it.quality=r.quality;if(it.status!=='tracked')it.status='tracked';}
+    const pt={ts,price:r.price,qty:r.qty};
+    const hi=it.history.findIndex(p=>(p.ts||'')===ts);
+    if(hi>=0)it.history[hi]=pt;else it.history.push(pt);
+    rec++;
+  });
+  save();closeAll();renderAll();
+  toast(`已记录 ${fmtTs(ts)} · ${rec} 项${added?` · 新增 ${added}`:''}${black?` · 拉黑 ${black}`:''}`);
+}
+
+/* ---------- 管理 ---------- */
+function openManage(){renderManage();show('m-manage');}
+function renderManage(){
+  const black=Object.entries(db.items).filter(([n,it])=>it.status==='blacklist');
+  const tracked=Object.entries(db.items).filter(([n,it])=>it.status==='tracked');
+  const chips=black.length?black.map(([n])=>
+    `<span class="chip restore">${esc(n)}<button title="移出黑名单" onclick="unblacklist('${enc(n)}')">×</button></span>`).join('')
+    :'<span style="color:var(--muted);font-size:13px">黑名单为空</span>';
+  const opts=tracked.concat(black).map(([n])=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  document.getElementById('manage-body').innerHTML=`
+    <div class="msec">
+      <h4>黑名单 · 上传时自动跳过,不读取数据</h4>
+      <div class="chips" style="margin-bottom:10px">${chips}</div>
+      <div class="row-field">
+        <input type="text" id="bl-new" placeholder="手动加入物品名" style="flex:1;min-width:150px"
+          onkeydown="if(event.key==='Enter')addBlacklistByName()">
+        <button class="btn sm" onclick="addBlacklistByName()">加入黑名单</button>
       </div>
-      <div class="zx-sec">
-        <h3>云同步（GitHub Gist）</h3>
-        <div class="zx-item"><span class="lbl">Token</span><input type="password" id="syncToken" value="${esc(syncCfg.token)}" placeholder="仅需 gist 权限的 Token"></div>
-        <div class="zx-item"><span class="lbl">Gist ID</span><input type="text" id="syncGist" value="${esc(syncCfg.gist)}" placeholder="留空，首次上传自动创建"></div>
-        <label class="zx-note" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px">
-          <input type="checkbox" id="syncAuto" ${syncCfg.auto?'checked':''}> 打卡后自动上传到云端
-        </label>
-        <div class="zx-backup">
-          <button class="zx-bk" id="btnPush">☁ 上传到云端</button>
-          <button class="zx-bk" id="btnPull">⟳ 从云端拉取</button>
-        </div>
-        <div class="zx-note">数据存到你 GitHub 账号下的私密 Gist，多设备同步。换设备使用时：先填同一个 Token 和 Gist ID，点「从云端拉取」。Token 只保存在本浏览器，不会进入备份文件。</div>
+    </div>
+    <div class="msec">
+      <h4>重命名 · 修正识别错误(会合并历史记录)</h4>
+      <div class="row-field">
+        <select id="rn-old">${opts}</select>
+        <input type="text" id="rn-new" placeholder="新名称" style="flex:1;min-width:140px">
+        <button class="btn sm primary" onclick="doRename()">重命名</button>
       </div>
-      <div class="zx-note">删除角色或事项不会清除历史打卡数据，只是不再显示。</div>
-       <div class="zx-savebar"><button class="zx-save" id="saveCfg">保 存</button></div>`;
-  }
+    </div>
+    <div class="msec">
+      <h4>备份与恢复</h4>
+      <div class="row-field" style="gap:8px">
+        <button class="btn sm" onclick="exportData()">复制全部数据</button>
+        <button class="btn sm" onclick="importBackup()">粘贴恢复</button>
+        <button class="btn sm" onclick="clearAll()" style="border-color:#7a3b3b;color:#d99">清空重来</button>
+      </div>
+      <textarea id="backup-text" style="min-height:90px;margin-top:10px" placeholder="导出的数据会出现在这里,或粘贴备份后点「粘贴恢复」"></textarea>
+    </div>`;
+}
+function doRename(){
+  const oldN=document.getElementById('rn-old').value;
+  const newN=document.getElementById('rn-new').value.trim();
+  if(!newN||oldN===newN){toast('请输入新名称');return;}
+  const it=db.items[oldN];if(!it)return;
+  if(db.items[newN]){
+    const map={};
+    cleanHist(db.items[newN].history).concat(cleanHist(it.history)).forEach(p=>map[p.ts]=p);
+    db.items[newN].history=Object.values(map).sort((a,b)=>tval(a.ts)-tval(b.ts));
+  }else db.items[newN]=it;
+  delete db.items[oldN];
+  save();renderAll();renderManage();toast('已重命名为「'+newN+'」');
+}
+function exportData(){
+  const t=document.getElementById('backup-text');t.value=JSON.stringify(db);
+  t.select();try{navigator.clipboard.writeText(t.value);}catch(e){}
+  toast('已复制到剪贴板');
+}
+function importBackup(){
+  try{
+    const d=migrate(JSON.parse(document.getElementById('backup-text').value));
+    if(!d)throw 0;
+    db=d;if(!db.catOrder)db.catOrder=allCats();
+    save();closeAll();renderAll();toast('已恢复备份');
+  }catch(e){toast('备份数据无效');}
+}
+function clearAll(){
+  if(!confirm('确定清空所有记录并重置为初始行情?此操作不可撤销。'))return;
+  localStorage.removeItem(KEY);localStorage.removeItem('zxsj_tracker_v2');
+  db=load();activeCat='全部';renderAll();closeAll();toast('已重置');
+}
 
-  function collectSettings(){
-    const out = {chars:[], daily:[], weekly:[]};
-    document.querySelectorAll('.zx-sec').forEach(sec=>{
-      const kind = sec.dataset.kind;
-      if(!kind || !out[kind]) return;
-      sec.querySelectorAll('.zx-item').forEach(it=>{
-        const name = it.querySelector('input[type=text]').value.trim();
-        if(!name) return;
-        const entry = {id: it.dataset.id, name};
-        if(kind !== 'chars'){
-          const mEl = it.querySelector('.times');
-          entry.max = Math.max(1, parseInt(mEl ? mEl.value : '1', 10) || 1);
-        }
-        out[kind].push(entry);
-      });
-    });
-    return out;
-  }
+/* ---------- 弹窗 ---------- */
+function show(id){document.querySelectorAll('.mask').forEach(m=>m.classList.remove('show'));
+  document.getElementById(id).classList.add('show');}
+function closeAll(){document.querySelectorAll('.mask').forEach(m=>m.classList.remove('show'));}
+document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeAll();}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll();});
 
-  /* ================= 事件 ================= */
-  document.querySelectorAll('.zx-tab').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      document.querySelectorAll('.zx-tab').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      tab = b.dataset.tab;
-      render();
-    });
-  });
+/* ---------- 启动 ---------- */
+db=load();
+initDrop();
+renderAll();
 
-  body.addEventListener('click', async e=>{
-    const tgl = e.target.closest('[data-toggle]');
-    if(tgl){ return toggle(tgl.dataset.t, tgl.dataset.c); }
-
-    const bp = e.target.closest('[data-bump]');
-    if(bp){ return bump(bp.dataset.t, bp.dataset.c, parseInt(bp.dataset.bump,10), parseInt(bp.dataset.m,10)); }
-
-    const nav = e.target.closest('[data-act]');
-    if(nav){
-      if(nav.dataset.act==='prev') viewDate = shiftDate(viewDate,-1);
-      if(nav.dataset.act==='next' && viewDate < todayStr()) viewDate = shiftDate(viewDate,1);
-      if(nav.dataset.act==='today') viewDate = todayStr();
-      return render();
-    }
-
-    if(e.target.closest('.zx-del')){
-      e.target.closest('.zx-item').remove();
-      return;
-    }
-    if(e.target.closest('.mv-up')){
-      const it = e.target.closest('.zx-item'), prev = it.previousElementSibling;
-      if(prev && prev.classList.contains('zx-item')) it.parentNode.insertBefore(it, prev);
-      return;
-    }
-    if(e.target.closest('.mv-dn')){
-      const it = e.target.closest('.zx-item'), next = it.nextElementSibling;
-      if(next && next.classList.contains('zx-item')) it.parentNode.insertBefore(next, it);
-      return;
-    }
-    const add = e.target.closest('.zx-add');
-    if(add){
-      const kind = add.dataset.kind;
-      const div = document.createElement('div');
-      div.className = 'zx-item';
-      div.dataset.id = uid(kind[0]);
-      div.innerHTML = `<span class="zx-mv"><button class="mv-up" title="上移">▲</button><button class="mv-dn" title="下移">▼</button></span>
-        <input type="text" value="" placeholder="名称">
-        ${kind==='weekly'?'<span class="lbl">每周次数</span><input type="text" class="times" value="1">':''}
-        <button class="zx-del" title="删除">✕</button>`;
-      add.before(div);
-      div.querySelector('input').focus();
-      return;
-    }
-    if(e.target.id === 'btnExport'){ return exportJSON(); }
-    if(e.target.id === 'btnImport'){
-      document.getElementById('fileImport').click();
-      return;
-    }
-    if(e.target.id === 'btnPush'){ return pushCloud(false); }
-    if(e.target.id === 'btnPull'){ return pullCloud(); }
-    if(e.target.id === 'saveCfg'){
-      const cfg = collectSettings();
-      if(!cfg.chars.length){ toast('至少保留一个角色'); return; }
-      config = cfg;
-      await saveKey(CONFIG_KEY, config);
-      schedulePush();
-      toast('已保存');
-      tab = 'daily';
-      document.querySelector('.zx-tab[data-tab=daily]').classList.add('on');
-      render();
-    }
-  });
-
-  body.addEventListener('change', async e=>{
-    if(e.target.id === 'fileImport' && e.target.files && e.target.files[0]){
-      importJSON(e.target.files[0]);
-      e.target.value = '';
-      return;
-    }
-    if(['syncToken','syncGist','syncAuto'].includes(e.target.id)){
-      syncCfg.token = (document.getElementById('syncToken')||{}).value?.trim() || '';
-      syncCfg.gist  = (document.getElementById('syncGist')||{}).value?.trim() || '';
-      syncCfg.auto  = !!(document.getElementById('syncAuto')||{}).checked;
-      await saveKey(SYNC_KEY, syncCfg);
-      toast('同步设置已保存');
-    }
-  });
-
-  /* ================= 启动 ================= */
-  (async ()=>{
-    await loadConfig();
-    await loadSync();
-    render();
-  })();
-})();
 </script>
 </body>
 </html>
